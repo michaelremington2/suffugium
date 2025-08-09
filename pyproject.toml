@@ -1,0 +1,16 @@
+[project]
+name = "myproject"
+version = "0.1.0"
+description = "Suffugium is a thermally dependent agent-based model for simulating the effects of temperature on ectotherm behavior."
+authors = [
+    { name = "Michael Remington", email = "michaelremington2@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+]
+
+[tool.pip]
+# Optional: if using uv/pip-tools later
