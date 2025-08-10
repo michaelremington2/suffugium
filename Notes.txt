@@ -1,0 +1,2 @@
+- Measuring survivorship of agents in a simulation
+-   - Remove birth process and several death processes
