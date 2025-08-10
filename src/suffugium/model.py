@@ -16,7 +16,23 @@ class Suffugium(mesa.Model):
         with open(config, "r") as f:
             _config = yaml.safe_load(f)
         self.config = RootConfig.model_validate(_config)
-        print(f"Config loaded: {cfg}")
+        self.initialize_landscape()
+
+    def initialize_landscape(self):
+        """Initialize the landscape based on the configuration."""
+        if self.config.Landscape_Parameters.spatially_explicit:
+            raise NotImplementedError("Spatially explicit landscapes are not yet implemented.")
+        else:
+            from landscape import Spatially_Implicit_Landscape
+            # Each snake gets a cell, No movment, so cell_count = population_size
+            cell_count = self.config.Model_Parameters.agents.Rattlesnake
+            self.landscape = Spatially_Implicit_Landscape(
+                model=self,
+                cell_count=cell_count,
+                thermal_profile_csv_fp=self.config.Landscape_Parameters.Thermal_Database_fp
+            )
+            print(f"Landscape initialized with {cell_count} cells.")
+           
 
 
 if __name__ ==  "__main__":

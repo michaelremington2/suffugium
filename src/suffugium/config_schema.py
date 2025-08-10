@@ -1,16 +1,21 @@
 # config_schema.py
 from __future__ import annotations
 from typing import Dict, List, Literal
-from pydantic import BaseModel, Field, FilePath, ConfigDict, conint, confloat, field_validator
+from pydantic import BaseModel, Field, FilePath, ConfigDict, conint, confloat, field_validator, model_validator
 
 # Constrained types
 Hour = conint(ge=0, le=24)  # we'll map 24 -> 0 in validators
 
 # ---------- Top-level ----------
+class agentsConfig(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    Rattlesnake: conint(ge=0)  # Population size of Rattlesnakes
+
 class ModelParameters(BaseModel):
     model_config = ConfigDict(extra='forbid')
     Site: str
     Experiment: str  # ints will coerce to str if needed
+    agents: agentsConfig
 
 class EnvTempCols(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -26,6 +31,22 @@ class LandscapeParameters(BaseModel):
     spatially_explicit: bool
     torus: bool
     moore: bool
+
+    @model_validator(mode="after")
+    def _check_dims_align_with_spatial_mode(self):
+        if self.spatially_explicit:
+            if self.Width is None or self.Height is None:
+                raise ValueError(
+                    "Width and Height are required when spatially_explicit=True"
+                )
+        else:
+            # Spatially implicit: Width/Height should be None
+            # (You could also just ignore them if provided.)
+            if self.Width is not None or self.Height is not None:
+                # Normalize to None to avoid accidental use
+                object.__setattr__(self, 'Width', None)
+                object.__setattr__(self, 'Height', None)
+        return self
 
 # ---------- Rattlesnake ----------
 class BodySizeConfig(BaseModel):
@@ -94,7 +115,6 @@ class Brumation(BaseModel):
 class RattlesnakeParameters(BaseModel):
     model_config = ConfigDict(extra='forbid', populate_by_name=True)
     species: Literal['Rattlesnake']  # relax to str if you plan multiple species
-    population_size: conint(ge=0)
     thermoregulation_strategy: Literal['Ectotherm', 'Endotherm']
     body_size_config: BodySizeConfig
     active_hours: List[Hour]

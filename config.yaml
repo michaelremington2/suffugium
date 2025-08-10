@@ -1,6 +1,8 @@
 Model_Parameters:
   Site: 'Texas'
   Experiment: '3'
+  agents:
+    Rattlesnake: 1000
 
 Landscape_Parameters:
   Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/texas_1yr_climate_sim.csv'
@@ -15,7 +17,6 @@ Landscape_Parameters:
 
 Rattlesnake_Parameters:
   species: 'Rattlesnake'
-  population_size: 100
   thermoregulation_strategy: 'Ectotherm'
   body_size_config:
     distribution: 'normal'
