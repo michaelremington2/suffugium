@@ -2,22 +2,16 @@ Model_Parameters:
   Site: 'Texas'
   Experiment: '3'
   agents:
-    Rattlesnake: 1000
+    Rattlesnake: 100
 
 Landscape_Parameters:
   Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/texas_1yr_climate_sim.csv'
   ENV_Temperature_Cols:
     Open: 'open_plus_3'
     Burrow: 'burrow_plus_3'
-  spatially_explicit: false
-  torus: false
-  moore: false
-  Width: null
-  Height: null
 
 Rattlesnake_Parameters:
   species: 'Rattlesnake'
-  thermoregulation_strategy: 'Ectotherm'
   body_size_config:
     distribution: 'normal'
     mean: 258.1
@@ -56,16 +50,15 @@ Rattlesnake_Parameters:
                                    'Brumation':1}
 
 Interaction_Parameters:
-  Rattlesnake-KangarooRat:
-    calories_per_gram: 1.38
-    digestion_efficiency: 0.8
-    expected_prey_body_size: 65
-    handling_time: 2
-    attack_rate_range: 
-      min: 0.001
-      max: 0.01
-    prey_density_range:
-      min: 1
-      max: 22
-    searching_behavior: True
-    prey_active_hours: [20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
+  calories_per_gram: 1.38
+  digestion_efficiency: 0.8
+  expected_prey_body_size: 65
+  handling_time: 2
+  attack_rate_range: 
+    min: 0.001
+    max: 0.01
+  prey_density_range:
+    min: 1
+    max: 22
+  searching_behavior: True
+  prey_active_hours: [20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]

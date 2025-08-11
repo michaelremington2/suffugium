@@ -1,7 +1,7 @@
 import polars as pl
 
-class Spatially_Implicit_Landscape(object):
-    def __init__(self, model, cell_count: int):
+class Patch(object):
+    def __init__(self, model):
         self.model = model
         self.landscape_config = model.config.Landscape_Parameters
         self.microhabitats = ['Burrow', 'Open']
@@ -29,10 +29,10 @@ class Spatially_Implicit_Landscape(object):
     def meters_to_hectares(self, val):
         return float(val / self.hectare_to_meter)
     
-    def set_landscape_temperatures(self, step_id):
+    def set_landscape_temperatures(self):
         # set these to env_cols
-        open_temp = self.thermal_profile.select(self.env_columns.Open).row(step_id)[0]
-        burrow_temp = self.thermal_profile.select(self.env_columns.Burrow).row(step_id)[0]
+        open_temp = self.thermal_profile.select(self.env_columns.Open).row(self.model.step_id)[0]
+        burrow_temp = self.thermal_profile.select(self.env_columns.Burrow).row(self.model.step_id)[0]
         self.open_temperature = open_temp
         self.burrow_temperature = burrow_temp
 

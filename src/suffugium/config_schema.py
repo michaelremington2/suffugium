@@ -26,27 +26,6 @@ class LandscapeParameters(BaseModel):
     model_config = ConfigDict(extra='forbid')
     Thermal_Database_fp: FilePath
     ENV_Temperature_Cols: EnvTempCols
-    Width: conint(ge=1) | None = None
-    Height: conint(ge=1) | None = None
-    spatially_explicit: bool
-    torus: bool
-    moore: bool
-
-    @model_validator(mode="after")
-    def _check_dims_align_with_spatial_mode(self):
-        if self.spatially_explicit:
-            if self.Width is None or self.Height is None:
-                raise ValueError(
-                    "Width and Height are required when spatially_explicit=True"
-                )
-        else:
-            # Spatially implicit: Width/Height should be None
-            # (You could also just ignore them if provided.)
-            if self.Width is not None or self.Height is not None:
-                # Normalize to None to avoid accidental use
-                object.__setattr__(self, 'Width', None)
-                object.__setattr__(self, 'Height', None)
-        return self
 
 # ---------- Rattlesnake ----------
 class BodySizeConfig(BaseModel):
@@ -115,7 +94,6 @@ class Brumation(BaseModel):
 class RattlesnakeParameters(BaseModel):
     model_config = ConfigDict(extra='forbid', populate_by_name=True)
     species: Literal['Rattlesnake']  # relax to str if you plan multiple species
-    thermoregulation_strategy: Literal['Ectotherm', 'Endotherm']
     body_size_config: BodySizeConfig
     active_hours: List[Hour]
     Initial_Body_Temperature: float
@@ -153,7 +131,8 @@ class RangeF(BaseModel):
             raise ValueError('range.max must be > min')
         return v
 
-class RKInteraction(BaseModel):
+class InteractionParameters(BaseModel):
+    model_config = ConfigDict(extra='forbid', populate_by_name=True)
     model_config = ConfigDict(extra='forbid')
     calories_per_gram: confloat(gt=0)
     digestion_efficiency: confloat(ge=0, le=1)
@@ -168,12 +147,7 @@ class RKInteraction(BaseModel):
     @classmethod
     def _norm_prey_hours(cls, hours: List[int]) -> List[int]:
         return sorted({(h if h != 24 else 0) for h in hours})
-
-class InteractionParameters(BaseModel):
-    model_config = ConfigDict(extra='forbid', populate_by_name=True)
-    # YAML key "Rattlesnake-KangarooRat" -> Python attribute with alias:
-    Rattlesnake_KangarooRat: RKInteraction = Field(alias='Rattlesnake-KangarooRat')
-
+    
 # ---------- Root ----------
 class RootConfig(BaseModel):
     model_config = ConfigDict(extra='forbid')
