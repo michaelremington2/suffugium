@@ -154,7 +154,7 @@ class Rattlesnake(Agent):
             raise ValueError('Microhabitat Property Value cant be found')
         return t_env
     
-    def update_body_temp(self, t_env):
+    def update_body_temp(self):
         old_body_temp = self.body_temperature
         t_env = self.get_t_env(self.current_microhabitat)
         self.body_temperature = self.cooling_eq_k(k=self.k, t_body=self.body_temperature, t_env=t_env, delta_t=self.delta_t)

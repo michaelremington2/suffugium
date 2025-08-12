@@ -43,11 +43,19 @@ class EctothermBehavior(object):
         self._attack_rate = 0
         self._handling_time = 0
         self._prey_density = 0
-        self._strike_performance = self.snake.strike_performance
+        self._strike_performance = 0
         self._prey_encountered = 0
         self._prey_consumed = 0
         self.attack_rate = self.set_attack_rate()
         self.prey_density = self.set_prey_density()
+        self.strike_performance = self.snake.strike_performance
+        self.handling_time = self.interaction_config.handling_time
+        self.calories_per_gram = self.interaction_config.calories_per_gram
+        self.digestion_efficiency = self.interaction_config.digestion_efficiency
+        self.prey_active_hours = self.interaction_config.prey_active_hours
+        self.prey_body_size = self.interaction_config.expected_prey_body_size
+        self.searching_behavior = self.interaction_config.searching_behavior
+        self.emergent_behaviors = ['Rest', 'Thermoregulate', 'Forage']
 
     @property
     def prey_density(self):
@@ -72,6 +80,14 @@ class EctothermBehavior(object):
     @handling_time.setter
     def handling_time(self, value):
         self._handling_time = value
+
+    @property
+    def strike_performance(self):
+        return self._strike_performance
+
+    @strike_performance.setter
+    def strike_performance(self, value):
+        self._strike_performance = value
 
     @property
     def prey_encountered(self):
@@ -144,26 +160,14 @@ class EctothermBehavior(object):
         self.snake.current_behavior = 'Forage'
         self.snake.active = True
 
-
-        # switched to using holling 2 function for just consumption rate`
         prey_encountered = self.holling_type_2(prey_density = self.prey_density,  attack_rate = self.attack_rate, handling_time =self.handling_time, strike_success=self.strike_performance)
-        self.prey_encountered = prey_encountered
+        self.prey_encountered += prey_encountered
         prey_consumed = int(np.random.poisson(prey_encountered)) 
-        if prey_consumed> 0 and self.model.active_krats_count >= prey_encountered:
-            prey = self.model.get_active_krat()
-            cal_per_gram = self.model.interaction_map.get_calories_per_gram(predator=predator_label, prey=prey.species_name)
-            digestion_efficiency = self.model.interaction_map.get_digestion_efficiency(predator=predator_label, prey=prey.species_name)
-            self.snake.metabolism.cals_gained(prey.mass, cal_per_gram, digestion_efficiency)
-            if prey.constant_pop == False:
-                prey.alive = False
-                prey.cause_of_death = 'predation'
-            self.model.logger.log_data(file_name = self.model.output_folder+"BirthDeath.csv",
-                                        data=prey.birth_death_module.report_data(event_type='Death'))
+        if prey_consumed> 0:
+            self.snake.metabolism.cals_gained(self.prey_body_size, self.cal_per_gram, self.digestion_efficiency)
             if self.snake.searching_behavior:
-                self.snake.search_counter = handling_time
-            if prey.constant_pop == False:
-                self.model.remove_agent(prey)
-        self.prey_consumed = prey_consumed
+                self.snake.search_counter = self.handling_time
+
 
     def rest(self):
         '''Resting behavior'''
@@ -176,7 +180,7 @@ class EctothermBehavior(object):
         self.snake.current_microhabitat = 'Open'
         self.snake.current_behavior = 'Search'
         self.snake.active = True
-        self.snake.search_counter -= 1
+        self.search_counter -= 1
 
     def bruminate(self):
         '''overwintering behavior'''
@@ -278,7 +282,7 @@ class EctothermBehavior(object):
     def choose_behavior(self):
         '''Choose a behavior stochastically from sparsemax probabilities'''
         behavior_probabilities = self.set_behavioral_weights()
-        return np.random.choice(self.snake.emergent_behaviors, p=behavior_probabilities)
+        return np.random.choice(self.emergent_behaviors, p=behavior_probabilities)
 
     def step(self):
         '''Handles picking and executing behavior functions'''
