@@ -2,7 +2,7 @@ Model_Parameters:
   Site: 'Texas'
   Experiment: '3'
   agents:
-    Rattlesnake: 100
+    Rattlesnake: 5
 
 Landscape_Parameters:
   Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/texas_1yr_climate_sim.csv'

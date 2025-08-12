@@ -1,8 +1,8 @@
 import numpy as np
 #import ThermaNewt.sim_snake_tb as tn
-from numba import njit
-from scipy.special import softmax
 from math import isclose
+from numba import njit
+
 
 def sparsemax(z):
     """
@@ -31,66 +31,77 @@ def sparsemax(z):
     p /= p.sum()  # ensure probabilities sum to 1 for numerical stability
     return p
 
+
+def set_value_uniform(min_value, max_value):
+    return float(np.random.uniform(min_value, max_value))
+
 class EctothermBehavior(object):
-    def __init__(self, snake):
+    def __init__(self, snake, interaction_config):
         self.snake = snake
         self.model = self.snake.model
-        # self.thermoregulation_module = tn.ThermalSimulator(flip_logic='preferred',
-        #                                                    t_pref_min=self.snake.t_pref_min,
-        #                                                    t_pref_max=self.snake.t_pref_max,
-        #                                                    t_pref_opt=self.snake.t_opt)
-        self._log_prey_density = 0  
-        self._log_attack_rate = 0  
-        self._log_handling_time = 0 
-        self._log_prey_encountered = 0 
-        self._log_prey_consumed = 0
-    
+        self.interaction_config = interaction_config
+        self._attack_rate = 0
+        self._handling_time = 0
+        self._prey_density = 0
+        self._strike_performance = self.snake.strike_performance
+        self._prey_encountered = 0
+        self._prey_consumed = 0
+        self.attack_rate = self.set_attack_rate()
+        self.prey_density = self.set_prey_density()
+
     @property
     def prey_density(self):
-        return self._log_prey_density
+        return self._prey_density
 
     @prey_density.setter
     def prey_density(self, value):
-        self._log_prey_density = value
+        self._prey_density = value
 
     @property
     def attack_rate(self):
-        return self._log_attack_rate
+        return self._attack_rate
 
     @attack_rate.setter
     def attack_rate(self, value):
-        self._log_attack_rate = value
+        self._attack_rate = value
 
     @property
     def handling_time(self):
-        return self._log_handling_time
+        return self._handling_time
 
     @handling_time.setter
     def handling_time(self, value):
-        self._log_handling_time = value
+        self._handling_time = value
 
     @property
     def prey_encountered(self):
-        return self._log_prey_encountered
+        return self._prey_encountered
 
     @prey_encountered.setter
     def prey_encountered(self, value):
-        self._log_prey_encountered = value
+        self._prey_encountered = value
 
     @property
     def prey_consumed(self):
-        return self._log_prey_consumed
+        return self._prey_consumed
 
     @prey_consumed.setter
     def prey_consumed(self, value):
-        self._log_prey_consumed = value
+        self._prey_consumed = value
 
-    def reset_log_metrics(self):
-        self.handling_time = 0
-        self.attack_rate = 0
-        self.prey_density = 0
-        self.prey_encountered = 0
-        self.prey_consumed = 0
+    def set_attack_rate(self):
+        """Set the attack rate based on interaction parameters."""
+        return set_value_uniform(
+            min_value=self.interaction_config.attack_rate_range.min,
+            max_value=self.interaction_config.attack_rate_range.max
+        )
+    
+    def set_prey_density(self):
+        """Set the prey density based on interaction parameters."""
+        return set_value_uniform(
+            min_value=self.interaction_config.prey_density_range.min,
+            max_value=self.interaction_config.prey_density_range.max
+        )
 
     def thermal_accuracy_calculator(self):
         '''Calculate thermal accuracy'''
@@ -133,28 +144,9 @@ class EctothermBehavior(object):
         self.snake.current_behavior = 'Forage'
         self.snake.active = True
 
-        predator_label = self.snake.species_name
-        prey_label = self.model.interaction_map.get_prey_for_predator(predator_label=predator_label)[0]
-        self.prey_density = self.model.active_krats_count / self.model.landscape.landscape_size
-
-        # Attack rate
-        attack_range = self.model.interaction_map.get_attack_rate_range(predator=predator_label, prey=prey_label)
-        if attack_range['min']!=attack_range['max']:
-            attack_rate = np.random.uniform(attack_range['min'], attack_range['max'])
-        else:
-            attack_rate = attack_range['min']
-        self.attack_rate = attack_rate
-
-        # Handling time
-        handling_time_range = self.model.interaction_map.get_handling_time_range(predator=predator_label, prey=prey_label)
-        if handling_time_range['min']!=handling_time_range['max']:
-            handling_time = np.random.uniform(handling_time_range['min'], handling_time_range['max'])
-        else:
-            handling_time = handling_time_range['min']
-        self.handling_time = handling_time
 
         # switched to using holling 2 function for just consumption rate`
-        prey_encountered = self.holling_type_2(self.prey_density,  attack_rate, handling_time, strike_success=self.snake.strike_performance_opt)
+        prey_encountered = self.holling_type_2(prey_density = self.prey_density,  attack_rate = self.attack_rate, handling_time =self.handling_time, strike_success=self.strike_performance)
         self.prey_encountered = prey_encountered
         prey_consumed = int(np.random.poisson(prey_encountered)) 
         if prey_consumed> 0 and self.model.active_krats_count >= prey_encountered:

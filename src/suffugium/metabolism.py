@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from numba import njit, prange
 
 class EctothermMetabolism(object):
-    def __init__(self, org, model, initial_metabolic_state, max_meals, X1_mass, X2_temp, X3_const):
+    def __init__(self, org, model, initial_metabolic_state, max_meals,prey_body_size, calories_per_gram, X1_mass, X2_temp, X3_const):
         self.org = org
         self.model = model
         self.mlo2_to_joules = 19.874
@@ -14,6 +14,8 @@ class EctothermMetabolism(object):
         self._metabolic_state = None
         self.metabolic_state = initial_metabolic_state
         self.max_meals = max_meals
+        self.prey_body_size = prey_body_size
+        self.calories_per_gram = calories_per_gram
         self.initialize_max_metabolic_state()
 
     @property
@@ -32,11 +34,7 @@ class EctothermMetabolism(object):
             raise ValueError("`metabolic_state` must be a range, list, tuple, or single numeric value.")
 
     def initialize_max_metabolic_state(self):
-        predator_label = self.org.species_name
-        prey_label = self.model.interaction_map.get_prey_for_predator(predator_label=predator_label)[0]
-        calories_per_gram = self.model.interaction_map.get_calories_per_gram(predator=predator_label, prey=prey_label)
-        expected_prey_body_size = self.model.interaction_map.get_expected_prey_body_size(predator=predator_label, prey=prey_label)
-        self.max_metabolic_state = self.max_meals * calories_per_gram * expected_prey_body_size
+        self.max_metabolic_state = self.max_meals * self.calories_per_gram * self.prey_body_size
 
     @staticmethod
     @njit

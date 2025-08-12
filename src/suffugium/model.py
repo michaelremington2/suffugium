@@ -22,6 +22,8 @@ class Suffugium(mesa.Model):
         self.thermal_profile = pl.read_csv(self.config.Landscape_Parameters.Thermal_Database_fp)
         self.env_columns = self.config.Landscape_Parameters.ENV_Temperature_Cols
         self.snake_population_size = self.config.Model_Parameters.agents.Rattlesnake
+        self.open_temp_vector = self.thermal_profile.select(self.env_columns.Open)
+        self.burrow_temp_vector = self.thermal_profile.select(self.env_columns.Burrow)
         self._burrow_temperature = None
         self._open_temperature = None
         self.initialize_population()
@@ -45,10 +47,18 @@ class Suffugium(mesa.Model):
     
     def set_temperatures(self):
         # set these to env_cols
-        open_temp = self.thermal_profile.select(self.env_columns.Open).row(self.step_id)[0]
-        burrow_temp = self.thermal_profile.select(self.env_columns.Burrow).row(self.step_id)[0]
+        open_temp = self.open_temp_vector.row(self.step_id)[0]
+        burrow_temp = self.open_temp_vector.row(self.step_id)[0]
         self.open_temperature = open_temp
         self.burrow_temperature = burrow_temp
+
+    def get_temperature(self, microhabitat):
+        if microhabitat == 'Burrow':
+            return self.burrow_temperature
+        elif microhabitat == 'Open':
+            return self.open_temperature
+        else:
+            raise ValueError(f"Unknown microhabitat: {microhabitat}")
 
     def initialize_population(self):
         Rattlesnake.create_agents(model=self, 
@@ -61,7 +71,9 @@ class Suffugium(mesa.Model):
         """Advance the model by one step."""
         # This function psuedo-randomly reorders the list of agent objects and
         # then iterates through calling the function passed in as the parameter
+        self.set_temperatures()
         self.agents.shuffle_do("step")
+        self.step_id += 1
 
 
 if __name__ ==  "__main__":

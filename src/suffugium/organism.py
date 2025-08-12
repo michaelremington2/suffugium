@@ -1,6 +1,14 @@
 from mesa import Agent
 import numpy as np
 import json
+import math
+import behavior
+import metabolism
+from scipy.stats import truncnorm
+
+def set_value_truncnorm(mean, std, min_value, max_value):
+    a, b = (min_value - mean) / std, (max_value - mean) / std
+    return float(truncnorm.rvs(a, b, loc=mean, scale=std))
 
 class Rattlesnake(Agent):
     """An abstract class representing an organism in the simulation."""
@@ -9,16 +17,22 @@ class Rattlesnake(Agent):
         super().__init__(model)
         self.config = config
         self.interaction_config = interaction_config
-        self.calories = 100  # Initial calories
         self.age = 0  # Age in days
         self._active = False
         self._alive = True
         self._cause_of_death  = None
-        self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
-        self.brumation_temp = self.model.config.Rattlesnake_Parameters.brumation.temperature
         self._current_behavior = 'Rest'  # Initial behavior
         self._current_microhabitat = 'Burrow'  # Initial microhabitat
-        self._body_temperature = 25  # Initial body temperature
+        self._body_temperature = self.config.Initial_Body_Temperature  # Initial body temperature
+        self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
+        self.brumation_temp = self.config.brumation.temperature
+        #self.behavior_module = behavior.EctothermBehavior(self, interaction_config)
+        self.metabolism = metabolism.EctothermMetabolism(org=self,
+                                                model=self.model, 
+                                                initial_metabolic_state=self.config.initial_calories, 
+                                                max_meals=self.config.utility.max_meals, 
+                                                X1_mass=self.config.smr.X1_mass,
+                                                X2_temp=self.config.smr.X2_temp, X3_const=self.config.smr.X3_const)
 
 
     @property
@@ -131,9 +145,9 @@ class Rattlesnake(Agent):
     
     def get_t_env(self, current_microhabitat):
         if current_microhabitat=='Burrow':
-            t_env = self.model.landscape.burrow_temperature
+            t_env = self.model.burrow_temperature
         elif current_microhabitat=='Open':
-            t_env = self.model.landscape.open_temperature
+            t_env = self.model.open_temperature
         elif current_microhabitat=='Winter_Burrow':
             t_env = self.brumation_temp
         else:
@@ -142,10 +156,11 @@ class Rattlesnake(Agent):
     
     def update_body_temp(self, t_env):
         old_body_temp = self.body_temperature
+        t_env = self.get_t_env(self.current_microhabitat)
         self.body_temperature = self.cooling_eq_k(k=self.k, t_body=self.body_temperature, t_env=t_env, delta_t=self.delta_t)
         return
 
     def step(self):
         """Advance the organism's state by one step."""
         self.age += 1
-        print("hello from organism step")
+        print(f"hello from organism {self.unique_id} my bt is {self.body_temperature} and my behavior is {self.current_behavior}")
