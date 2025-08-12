@@ -28,6 +28,13 @@ class Suffugium(mesa.Model):
         self._open_temperature = None
         self.initialize_population()
         self.step_id = 0
+        self.set_time()
+
+    #####################################################################################
+    ##
+    ## Properties
+    ##
+    #####################################################################################
 
     @property
     def burrow_temperature(self):
@@ -44,6 +51,44 @@ class Suffugium(mesa.Model):
     @open_temperature.setter
     def open_temperature(self, value):
         self._open_temperature = value
+
+    @property
+    def hour(self):
+        return self._hour
+
+    @hour.setter
+    def hour(self, value):
+        self._hour = value
+
+    @property
+    def day(self):
+        return self._day
+
+    @day.setter
+    def day(self, value):
+        self._day = value
+
+    @property
+    def month(self):
+        return self._month
+
+    @month.setter
+    def month(self, value):
+        self._month = value
+
+    @property
+    def year(self):
+        return self._year
+
+    @year.setter
+    def year(self, value):
+        self._year = value
+    
+    ######################################################################################
+    ##
+    ## Methods
+    ##
+    ######################################################################################
     
     def set_temperatures(self):
         # set these to env_cols
@@ -51,6 +96,17 @@ class Suffugium(mesa.Model):
         burrow_temp = self.open_temp_vector.row(self.step_id)[0]
         self.open_temperature = open_temp
         self.burrow_temperature = burrow_temp
+
+    def set_time(self):
+        """Set the current time in the model."""
+        self.hour = self.thermal_profile.select("hour").row(self.step_id)[0]
+        self.day = self.thermal_profile.select('day').row(self.step_id)[0]
+        self.month = self.thermal_profile.select('month').row(self.step_id)[0]
+        self.year = self.thermal_profile.select('year').row(self.step_id)[0]
+    
+    def get_timestamp(self):
+        """Get the current timestamp as a string."""
+        return f"{self.year}-{self.month:02d}-{self.day:02d} {self.hour:02d}:00:00"
 
     def get_temperature(self, microhabitat):
         if microhabitat == 'Burrow':
@@ -71,6 +127,7 @@ class Suffugium(mesa.Model):
         """Advance the model by one step."""
         # This function psuedo-randomly reorders the list of agent objects and
         # then iterates through calling the function passed in as the parameter
+        self.set_time()
         self.set_temperatures()
         self.agents.shuffle_do("step")
         self.step_id += 1
@@ -82,6 +139,9 @@ if __name__ ==  "__main__":
     output_directory = os.path.join(base_directory, 'results')
     model = Suffugium(config=config_path, output_directory=output_directory, seed=42)
     print(f"Model initialized")
-    model.step()
+    steps = 10
+    for i in range(steps):
+        print(model.get_timestamp())
+        model.step()
 
 

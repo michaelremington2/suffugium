@@ -1,14 +1,14 @@
 Model_Parameters:
-  Site: 'Texas'
-  Experiment: '3'
+  Site: 'Canada'
+  Experiment: '1'
   agents:
-    Rattlesnake: 5
+    Rattlesnake: 1
 
 Landscape_Parameters:
-  Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/texas_1yr_climate_sim.csv'
+  Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/canada_1yr_climate_sim.csv'
   ENV_Temperature_Cols:
-    Open: 'open_plus_3'
-    Burrow: 'burrow_plus_3'
+    Open: 'Open_mean_Temperature'
+    Burrow: 'Burrow_mean_Temperature'
 
 Rattlesnake_Parameters:
   species: 'Rattlesnake'
@@ -32,7 +32,7 @@ Rattlesnake_Parameters:
   voluntary_ct:
     min_temp: 5
     max_temp: 45
-    max_steps: 1
+    max_steps: 2
   strike_performance: 0.22
   delta_t: 60
   smr:

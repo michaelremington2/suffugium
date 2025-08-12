@@ -46,9 +46,9 @@ class EctothermBehavior(object):
         self._strike_performance = 0
         self._prey_encountered = 0
         self._prey_consumed = 0
+        self._search_counter = 0
         self.attack_rate = self.set_attack_rate()
         self.prey_density = self.set_prey_density()
-        self.strike_performance = self.snake.strike_performance
         self.handling_time = self.interaction_config.handling_time
         self.calories_per_gram = self.interaction_config.calories_per_gram
         self.digestion_efficiency = self.interaction_config.digestion_efficiency
@@ -59,7 +59,10 @@ class EctothermBehavior(object):
 
     @property
     def prey_density(self):
-        return self._prey_density
+        if self.model.hour in self.prey_active_hours:
+            return self._prey_density
+        else:
+            return 0
 
     @prey_density.setter
     def prey_density(self, value):
@@ -82,14 +85,6 @@ class EctothermBehavior(object):
         self._handling_time = value
 
     @property
-    def strike_performance(self):
-        return self._strike_performance
-
-    @strike_performance.setter
-    def strike_performance(self, value):
-        self._strike_performance = value
-
-    @property
     def prey_encountered(self):
         return self._prey_encountered
 
@@ -104,6 +99,14 @@ class EctothermBehavior(object):
     @prey_consumed.setter
     def prey_consumed(self, value):
         self._prey_consumed = value
+
+    @property
+    def search_counter(self):
+        return self._search_counter
+
+    @search_counter.setter
+    def search_counter(self, value):
+        self._search_counter = value
 
     def set_attack_rate(self):
         """Set the attack rate based on interaction parameters."""
@@ -160,7 +163,7 @@ class EctothermBehavior(object):
         self.snake.current_behavior = 'Forage'
         self.snake.active = True
 
-        prey_encountered = self.holling_type_2(prey_density = self.prey_density,  attack_rate = self.attack_rate, handling_time =self.handling_time, strike_success=self.strike_performance)
+        prey_encountered = self.holling_type_2(prey_density = self.prey_density,  attack_rate = self.attack_rate, handling_time =self.handling_time, strike_success=self.snake.strike_performance)
         self.prey_encountered += prey_encountered
         prey_consumed = int(np.random.poisson(prey_encountered)) 
         if prey_consumed> 0:
@@ -240,8 +243,8 @@ class EctothermBehavior(object):
         self.snake.active = True
         mh = self.preferred_topt(
             t_body=self.snake.body_temperature,
-            burrow_temp=self.snake.model.landscape.burrow_temperature,
-            open_temp=self.snake.model.landscape.open_temperature
+            burrow_temp=self.snake.model.burrow_temperature,
+            open_temp=self.snake.model.open_temperature
         )
         self.snake.current_microhabitat = mh
         
@@ -286,13 +289,14 @@ class EctothermBehavior(object):
 
     def step(self):
         '''Handles picking and executing behavior functions'''
-        self.reset_log_metrics()
         if self.snake.is_bruminating_today():
             self.bruminate()
-        elif self.snake.search_counter > 0:
-            self.search()
-        elif self.snake.birth_death_module.ct_out_of_bounds_tcounter>0:
+        elif self.model.hour not in self.snake.active_hours:
+            self.rest()
+        elif self.snake.ct_out_of_bounds_tcounter>0:
             self.thermoregulate()
+        elif self.search_counter > 0:
+            self.search()
         else:
             behavior = self.choose_behavior()
             behavior_actions = {

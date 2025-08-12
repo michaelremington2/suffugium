@@ -20,25 +20,47 @@ class Rattlesnake(Agent):
         self.age = 0  # Age in days
         self._active = False
         self._alive = True
-        self._cause_of_death  = None
+        self._cause_of_death  = None  
         self._current_behavior = 'Rest'  # Initial behavior
         self._current_microhabitat = 'Burrow'  # Initial microhabitat
         self._body_temperature = self.config.Initial_Body_Temperature  # Initial body temperature
         self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
+        self.strike_performance = self.config.strike_performance
+        self.max_thermal_accuracy =self.config.utility.max_thermal_accuracy
         self.brumation_temp = self.config.brumation.temperature
-        #self.behavior_module = behavior.EctothermBehavior(self, interaction_config)
+        self.behavior_module = behavior.EctothermBehavior(self, interaction_config)
         self.metabolism = metabolism.EctothermMetabolism(org=self,
                                                 model=self.model, 
                                                 initial_metabolic_state=self.config.initial_calories, 
                                                 max_meals=self.config.utility.max_meals, 
                                                 X1_mass=self.config.smr.X1_mass,
-                                                X2_temp=self.config.smr.X2_temp, X3_const=self.config.smr.X3_const)
+                                                X2_temp=self.config.smr.X2_temp, 
+                                                X3_const=self.config.smr.X3_const,
+                                                prey_body_size=interaction_config.expected_prey_body_size,
+                                                calories_per_gram=interaction_config.calories_per_gram)
+        self.active_hours = self.config.active_hours
+        self.activity_coefficients = self.config.behavior_activity_coefficients
+        self.initialize_thermal_preference()
+        self.initialize_ct_boundary()
 
 
     @property
     def species_name(self):
         """Returns the class name as a string."""
         return self.__class__.__name__
+    
+    @property
+    def cause_of_death(self):
+        '''Returns the cause of death if the organism is dead, otherwise None.'''
+        if not self.alive:
+            return self._cause_of_death
+        return None
+    
+    @cause_of_death.setter
+    def cause_of_death(self, value):
+        if not self.alive:
+            raise ValueError("Cannot set cause of death for a living organism.")
+        self._cause_of_death = value
 
     @property
     def current_behavior(self):
@@ -107,6 +129,20 @@ class Rattlesnake(Agent):
         if value==False:
             self.active=False
 
+    def initialize_thermal_preference(self):
+        """Initialize the thermal preference parameters."""
+        self.k = self.config.thermal_preference.k
+        self.t_pref_min = self.config.thermal_preference.t_pref_min
+        self.t_pref_max = self.config.thermal_preference.t_pref_max
+        self.t_opt = self.config.thermal_preference.t_opt
+        self.delta_t = self.config.delta_t
+
+    def initialize_ct_boundary(self):
+        self.ct_min = self.config.voluntary_ct.min_temp
+        self.ct_max = self.config.voluntary_ct.max_temp
+        self.ct_max_steps = self.config.voluntary_ct.max_steps
+        self.ct_out_of_bounds_tcounter = 0
+
     def get_brumination_period(self, file_path):
         '''
         Function to read in the brumation period from a JSON file
@@ -159,8 +195,24 @@ class Rattlesnake(Agent):
         t_env = self.get_t_env(self.current_microhabitat)
         self.body_temperature = self.cooling_eq_k(k=self.k, t_body=self.body_temperature, t_env=t_env, delta_t=self.delta_t)
         return
+    
+    def check_ct_out_of_bounds(self):
+        if self.body_temperature < self.ct_min:
+            self.ct_out_of_bounds_tcounter += 1
+            if self.ct_out_of_bounds_tcounter >= self.ct_max_steps:
+                self.alive = False
+                self._cause_of_death = 'Cold'
+        elif self.body_temperature > self.ct_max:
+            self.ct_out_of_bounds_tcounter += 1
+            if self.ct_out_of_bounds_tcounter >= self.ct_max_steps:
+                self.alive = False
+                self._cause_of_death = 'Heat'
+        else:
+            self.ct_out_of_bounds_tcounter = 0
 
     def step(self):
         """Advance the organism's state by one step."""
         self.age += 1
-        print(f"hello from organism {self.unique_id} my bt is {self.body_temperature} and my behavior is {self.current_behavior}")
+        self.behavior_module.step()
+        self.update_body_temp()
+        print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")
