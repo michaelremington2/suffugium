@@ -165,8 +165,8 @@ class EctothermBehavior(object):
 
         prey_encountered = self.holling_type_2(prey_density = self.prey_density,  attack_rate = self.attack_rate, handling_time =self.handling_time, strike_success=self.snake.strike_performance)
         self.prey_encountered += prey_encountered
-        prey_consumed = int(np.random.poisson(prey_encountered)) 
-        if prey_consumed> 0:
+        self.prey_consumed = int(np.random.poisson(prey_encountered)) 
+        if self.prey_consumed> 0:
             self.snake.metabolism.cals_gained(self.prey_body_size, self.cal_per_gram, self.digestion_efficiency)
             if self.snake.searching_behavior:
                 self.snake.search_counter = self.handling_time

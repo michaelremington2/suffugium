@@ -24,11 +24,16 @@ class Suffugium(mesa.Model):
         self.snake_population_size = self.config.Model_Parameters.agents.Rattlesnake
         self.open_temp_vector = self.thermal_profile.select(self.env_columns.Open)
         self.burrow_temp_vector = self.thermal_profile.select(self.env_columns.Burrow)
+        self.step_id = 0
         self._burrow_temperature = None
         self._open_temperature = None
-        self.initialize_population()
-        self.step_id = 0
+        self._hour = 0
+        self._day = 0
+        self._month = 0
+        self._year = 0
         self.set_time()
+        self.initialize_population()
+        
 
     #####################################################################################
     ##
@@ -103,6 +108,19 @@ class Suffugium(mesa.Model):
         self.day = self.thermal_profile.select('day').row(self.step_id)[0]
         self.month = self.thermal_profile.select('month').row(self.step_id)[0]
         self.year = self.thermal_profile.select('year').row(self.step_id)[0]
+
+    def get_season(self):
+        """Determine the season based on the month."""
+        if self.month in [12, 1, 2]:
+            return 'Winter'
+        elif self.month in [3, 4, 5]:
+            return 'Spring'
+        elif self.month in [6, 7, 8]:
+            return 'Summer'
+        elif self.month in [9, 10, 11]:
+            return 'Fall'
+        else:
+            raise ValueError(f"Invalid month: {self.month}")
     
     def get_timestamp(self):
         """Get the current timestamp as a string."""

@@ -5,6 +5,7 @@ import math
 import behavior
 import metabolism
 from scipy.stats import truncnorm
+import data_logger as dl
 
 def set_value_truncnorm(mean, std, min_value, max_value):
     a, b = (min_value - mean) / std, (max_value - mean) / std
@@ -24,6 +25,7 @@ class Rattlesnake(Agent):
         self._current_behavior = 'Rest'  # Initial behavior
         self._current_microhabitat = 'Burrow'  # Initial microhabitat
         self._body_temperature = self.config.Initial_Body_Temperature  # Initial body temperature
+        self._t_env = 0
         self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
         self.strike_performance = self.config.strike_performance
         self.max_thermal_accuracy =self.config.utility.max_thermal_accuracy
@@ -42,6 +44,9 @@ class Rattlesnake(Agent):
         self.activity_coefficients = self.config.behavior_activity_coefficients
         self.initialize_thermal_preference()
         self.initialize_ct_boundary()
+        self.data_logger = dl.DataLogger(model=self.model, snake=self)
+        self.data_logger.make_file()
+        self.data_logger.log_data() # Initial log entry
 
 
     @property
@@ -192,8 +197,8 @@ class Rattlesnake(Agent):
     
     def update_body_temp(self):
         old_body_temp = self.body_temperature
-        t_env = self.get_t_env(self.current_microhabitat)
-        self.body_temperature = self.cooling_eq_k(k=self.k, t_body=self.body_temperature, t_env=t_env, delta_t=self.delta_t)
+        self.t_env = self.get_t_env(self.current_microhabitat)
+        self.body_temperature = self.cooling_eq_k(k=self.k, t_body=self.body_temperature, t_env=self.t_env, delta_t=self.delta_t)
         return
     
     def check_ct_out_of_bounds(self):
@@ -213,6 +218,8 @@ class Rattlesnake(Agent):
     def step(self):
         """Advance the organism's state by one step."""
         self.age += 1
+        self.check_ct_out_of_bounds()
         self.behavior_module.step()
         self.update_body_temp()
+        self.data_logger.log_data()
         print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")
