@@ -267,5 +267,7 @@ class Rattlesnake(Agent):
         ac = self.get_activity_coefficent()
         self.metabolism.cals_lost(mass=self.body_size, temperature=self.body_temperature, activity_coefficient = ac)
         self.update_body_temp()
+        self.thermal_accuracy = self.calculate_thermal_accuracy()
+        self.thermal_quality = self.calculate_thermal_quality()
         self.data_logger.log_data()
         print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")

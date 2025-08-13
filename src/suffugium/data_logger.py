@@ -8,7 +8,7 @@ class DataLogger(object):
     def __init__(self, model, snake):
         self.model = model
         self.snake = snake
-        self.header = ['Step_id', 'Agent_ID', 'Experiment_Name', 'Study_site', 'Experiment', 'Hour', 'Day', 'Month', 'Season', 'Year','Alive','Active', 'Mass', 'Behavior', 'Microhabitat', 'Body_Temperature', 'T_env', 'Metabolic_state','Prey_Density', 'Attack_Rate', 'Prey_Consumed', 'Cause_of_Death']
+        self.header = ['Step_id', 'Agent_ID', 'Experiment_Name', 'Study_site', 'Experiment', 'Hour', 'Day', 'Month', 'Season', 'Year','Alive','Active', 'Mass', 'Behavior', 'Microhabitat', 'Body_Temperature', 'T_env','Thermal_Accuracy', 'Thermal_Quality', 'Metabolic_state','Prey_Density', 'Attack_Rate', 'Prey_Consumed', 'Cause_of_Death']
 
     def make_file_name(self):
         return f"{self.model.output_directory}/{self.snake.unique_id}_data_log.csv"
@@ -41,6 +41,8 @@ class DataLogger(object):
                 self.snake.current_microhabitat,
                 self.snake.body_temperature,
                 self.snake.t_env,
+                self.snake.thermal_accuracy,
+                self.snake.thermal_quality,
                 self.snake.metabolism.metabolic_state,
                 self.snake.behavior_module.prey_density,
                 self.snake.behavior_module.attack_rate,

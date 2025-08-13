@@ -6,6 +6,7 @@ from config_schema import RootConfig
 import polars as pl
 from organism import Rattlesnake
 from summarise_sim import SimSummerizer
+import time
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
@@ -155,6 +156,24 @@ class Suffugium(mesa.Model):
         self.agents.shuffle_do("step")
         self.step_id += 1
 
+    def run_model(self, max_steps=None):
+        if max_steps is None:
+            max_steps = len(self.thermal_profile)
+
+        start_time = time.perf_counter()
+
+        for _ in range(max_steps):
+            if not self.running:
+                break
+            self.step()
+
+        end_time = time.perf_counter()
+        elapsed = end_time - start_time
+        print(f"Model run completed in {elapsed:.2f} seconds.")
+
+        return
+
+
 
 if __name__ ==  "__main__":
     base_directory = '/home/micha/Documents/suffugium/'
@@ -164,9 +183,8 @@ if __name__ ==  "__main__":
     sim_id = 1
     model = Suffugium(config=config_path, output_directory=output_directory, sim_id=sim_id, seed=42)
     print(f"Model initialized")
-    steps = 10
-    for i in range(steps):
-        print(model.get_timestamp())
-        model.step()
+    model.run_model()
+    print(f"Run Complete")
+
 
 
