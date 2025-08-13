@@ -8,8 +8,9 @@ from organism import Rattlesnake
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
-    def __init__(self,  config, output_directory, seed=None):
+    def __init__(self, sim_id, config, output_directory, seed=None):
         super().__init__(seed=seed)
+        self.sim_id = sim_id
         if output_directory is not None:
             os.makedirs(output_directory, exist_ok=True)
             self.output_directory = output_directory
@@ -18,6 +19,9 @@ class Suffugium(mesa.Model):
         with open(config, "r") as f:
             _config = yaml.safe_load(f)
         self.config = RootConfig.model_validate(_config)
+        self.study_site = self.config.Model_Parameters.Site
+        self.experiment = self.config.Model_Parameters.Experiment
+        self.experiment_name = f"{self.study_site}_{self.experiment}"
         self.microhabitats = ['Burrow', 'Open']
         self.thermal_profile = pl.read_csv(self.config.Landscape_Parameters.Thermal_Database_fp)
         self.env_columns = self.config.Landscape_Parameters.ENV_Temperature_Cols
@@ -155,7 +159,8 @@ if __name__ ==  "__main__":
     base_directory = '/home/micha/Documents/suffugium/'
     config_path = os.path.join(base_directory, 'config.yaml')
     output_directory = os.path.join(base_directory, 'results')
-    model = Suffugium(config=config_path, output_directory=output_directory, seed=42)
+    sim_id = 1
+    model = Suffugium(config=config_path, output_directory=output_directory, sim_id=sim_id, seed=42)
     print(f"Model initialized")
     steps = 10
     for i in range(steps):

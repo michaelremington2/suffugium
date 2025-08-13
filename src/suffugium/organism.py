@@ -42,6 +42,7 @@ class Rattlesnake(Agent):
                                                 calories_per_gram=interaction_config.calories_per_gram)
         self.active_hours = self.config.active_hours
         self.activity_coefficients = self.config.behavior_activity_coefficients
+        self.set_body_size()
         self.initialize_thermal_preference()
         self.initialize_ct_boundary()
         self.data_logger = dl.DataLogger(model=self.model, snake=self)
@@ -148,6 +149,13 @@ class Rattlesnake(Agent):
         self.ct_max_steps = self.config.voluntary_ct.max_steps
         self.ct_out_of_bounds_tcounter = 0
 
+    def set_body_size(self):
+        mean_val = self.config.body_size_config.mean
+        std_val = self.config.body_size_config.std
+        min_val = self.config.body_size_config.min
+        max_val = self.config.body_size_config.max
+        self.body_size = set_value_truncnorm(mean=mean_val, std=std_val, min_value=min_val, max_value=max_val)
+
     def get_brumination_period(self, file_path):
         '''
         Function to read in the brumation period from a JSON file
@@ -220,6 +228,8 @@ class Rattlesnake(Agent):
         self.age += 1
         self.check_ct_out_of_bounds()
         self.behavior_module.step()
+        ac = self.get_activity_coefficent()
+        self.metabolism.cals_lost(mass=self.body_size, temperature=self.body_temperature, activity_coefficient = ac)
         self.update_body_temp()
         self.data_logger.log_data()
         print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")
