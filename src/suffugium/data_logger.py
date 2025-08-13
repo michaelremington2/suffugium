@@ -8,7 +8,7 @@ class DataLogger(object):
     def __init__(self, model, snake):
         self.model = model
         self.snake = snake
-        self.header = ['Step', 'Agent_ID', 'Experiment_Name', 'Study_site', 'Experiment', 'Hour', 'Day', 'Month', 'Season', 'Year','Alive','Active', 'Mass', 'Behavior', 'Microhabitat', 'Body_Temperature', 'T_env', 'Metabolic_state','Prey_Density', 'Attack_Rate', 'Prey_Consumed', 'Cause_of_Death']
+        self.header = ['Step_id', 'Agent_ID', 'Experiment_Name', 'Study_site', 'Experiment', 'Hour', 'Day', 'Month', 'Season', 'Year','Alive','Active', 'Mass', 'Behavior', 'Microhabitat', 'Body_Temperature', 'T_env', 'Metabolic_state','Prey_Density', 'Attack_Rate', 'Prey_Consumed', 'Cause_of_Death']
 
     def make_file_name(self):
         return f"{self.model.output_directory}/{self.snake.unique_id}_data_log.csv"
@@ -46,5 +46,4 @@ class DataLogger(object):
                 self.snake.behavior_module.attack_rate,
                 self.snake.behavior_module.prey_consumed,
                 self.snake.cause_of_death,
-
             ])

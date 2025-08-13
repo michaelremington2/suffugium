@@ -110,17 +110,17 @@ class EctothermBehavior(object):
 
     def set_attack_rate(self):
         """Set the attack rate based on interaction parameters."""
-        return set_value_uniform(
+        return np.round(set_value_uniform(
             min_value=self.interaction_config.attack_rate_range.min,
             max_value=self.interaction_config.attack_rate_range.max
-        )
+        ), decimals=3)
     
     def set_prey_density(self):
         """Set the prey density based on interaction parameters."""
-        return set_value_uniform(
+        return np.round(set_value_uniform(
             min_value=self.interaction_config.prey_density_range.min,
             max_value=self.interaction_config.prey_density_range.max
-        )
+        ),decimals=0)
 
     def thermal_accuracy_calculator(self):
         '''Calculate thermal accuracy'''
@@ -135,6 +135,16 @@ class EctothermBehavior(object):
         '''Numba-optimized function to normalize values between 0 and 1'''
         x = value / max_value
         return min(x, 1.0)
+    
+    def calc_thermoregulation_utility(self):
+        """Calculate the utility of thermoregulation based on thermal accuracy."""
+        db = self.thermal_accuracy_calculator()
+        if self.snake.body_temperature < self.snake.t_opt:
+            denominator = self.snake.t_opt - self.snake.t_pref_min
+        else:
+            denominator = self.snake.t_pref_max - self.snake.t_opt
+
+        return self.scale_value(db, denominator)
 
     @staticmethod
     @njit
@@ -167,9 +177,9 @@ class EctothermBehavior(object):
         self.prey_encountered += prey_encountered
         self.prey_consumed = int(np.random.poisson(prey_encountered)) 
         if self.prey_consumed> 0:
-            self.snake.metabolism.cals_gained(self.prey_body_size, self.cal_per_gram, self.digestion_efficiency)
+            self.snake.metabolism.cals_gained(self.prey_body_size, self.calories_per_gram, self.digestion_efficiency)
             if self.snake.searching_behavior:
-                self.snake.search_counter = self.handling_time
+                self.snake.search_counter = (self.handling_time-1)
 
 
     def rest(self):
@@ -254,7 +264,7 @@ class EctothermBehavior(object):
         if self.model.hour in self.snake.active_hours:
             db = self.thermal_accuracy_calculator()
             metabolic_state, max_metabolic_state = self.get_metabolic_state_variables()
-            thermoregulate_utility = self.scale_value(db, self.snake.max_thermal_accuracy)
+            thermoregulate_utility = self.calc_thermoregulation_utility()
             rest_utility = self.scale_value(metabolic_state, max_metabolic_state)
             forage_utility = 1 - rest_utility
         else:

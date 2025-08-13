@@ -5,6 +5,7 @@ import os
 from config_schema import RootConfig
 import polars as pl
 from organism import Rattlesnake
+from summarise_sim import SimSummerizer
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
@@ -159,6 +160,7 @@ if __name__ ==  "__main__":
     base_directory = '/home/micha/Documents/suffugium/'
     config_path = os.path.join(base_directory, 'config.yaml')
     output_directory = os.path.join(base_directory, 'results')
+    db_path = os.path.join(output_directory, 'suffugium.db')
     sim_id = 1
     model = Suffugium(config=config_path, output_directory=output_directory, sim_id=sim_id, seed=42)
     print(f"Model initialized")

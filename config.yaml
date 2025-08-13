@@ -22,13 +22,12 @@ Rattlesnake_Parameters:
   Initial_Body_Temperature: 25
   initial_calories: 100
   utility:
-    max_meals: 3 
-    max_thermal_accuracy: 5
+    max_meals: 3
   thermal_preference:
     k: 0.01
     t_pref_min: 19
-    t_pref_max: 29
-    t_opt: 26
+    t_pref_max: 32
+    t_opt: 29
   voluntary_ct:
     min_temp: 5
     max_temp: 45

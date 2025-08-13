@@ -26,9 +26,11 @@ class Rattlesnake(Agent):
         self._current_microhabitat = 'Burrow'  # Initial microhabitat
         self._body_temperature = self.config.Initial_Body_Temperature  # Initial body temperature
         self._t_env = 0
+        self._thermal_accuracy = 0
+        self._thermal_quality = 0
         self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
         self.strike_performance = self.config.strike_performance
-        self.max_thermal_accuracy =self.config.utility.max_thermal_accuracy
+        #self.max_thermal_accuracy =self.config.utility.max_thermal_accuracy
         self.brumation_temp = self.config.brumation.temperature
         self.behavior_module = behavior.EctothermBehavior(self, interaction_config)
         self.metabolism = metabolism.EctothermMetabolism(org=self,
@@ -135,6 +137,22 @@ class Rattlesnake(Agent):
         if value==False:
             self.active=False
 
+    @property
+    def thermal_accuracy(self):
+        return self._thermal_accuracy
+
+    @thermal_accuracy.setter
+    def thermal_accuracy(self, value):
+        self._thermal_accuracy = value
+
+    @property
+    def thermal_quality(self):
+        return self._thermal_quality
+
+    @thermal_quality.setter
+    def thermal_quality(self, value):
+        self._thermal_quality = value
+
     def initialize_thermal_preference(self):
         """Initialize the thermal preference parameters."""
         self.k = self.config.thermal_preference.k
@@ -223,9 +241,27 @@ class Rattlesnake(Agent):
         else:
             self.ct_out_of_bounds_tcounter = 0
 
+    def calculate_thermal_accuracy(self):
+        """Calculate the thermal accuracy based on the current body temperature."""
+        return np.abs(self.body_temperature - self.t_opt)
+    
+    def calculate_thermal_quality(self):
+        """Calculate the thermal quality based on the current body temperature."""
+        return np.abs(self.t_env - self.t_opt)
+
+    def is_starved(self):
+        '''
+        Internal state function to switch the state of the agent from alive to dead when their energy drops below 0.
+        '''
+        if self.metabolism.metabolic_state<=0:
+            self.alive = False
+            self.cause_of_death = 'Starved'
+
+
     def step(self):
         """Advance the organism's state by one step."""
         self.age += 1
+        self.is_starved()
         self.check_ct_out_of_bounds()
         self.behavior_module.step()
         ac = self.get_activity_coefficent()

@@ -47,7 +47,7 @@ class BodySizeConfig(BaseModel):
 class UtilityCfg(BaseModel):
     model_config = ConfigDict(extra='forbid')
     max_meals: conint(ge=0)
-    max_thermal_accuracy: confloat(ge=0)
+    # max_thermal_accuracy: confloat(ge=0)
 
 class ThermalPref(BaseModel):
     model_config = ConfigDict(extra='forbid')
