@@ -104,7 +104,7 @@ class Suffugium(mesa.Model):
     def set_temperatures(self):
         # set these to env_cols
         open_temp = self.open_temp_vector.row(self.step_id)[0]
-        burrow_temp = self.open_temp_vector.row(self.step_id)[0]
+        burrow_temp = self.burrow_temp_vector.row(self.step_id)[0]
         self.open_temperature = open_temp
         self.burrow_temperature = burrow_temp
 
@@ -145,6 +145,11 @@ class Suffugium(mesa.Model):
                                   n=self.snake_population_size,
                                   config=self.config.Rattlesnake_Parameters,
                                   interaction_config=self.config.Interaction_Parameters)
+        
+    def remove_agent(self, agent):
+        """Remove an agent from the model."""
+        self.agents.remove(agent)  # Removes from scheduler/AgentSet
+
 
 
     def step(self):

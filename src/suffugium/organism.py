@@ -28,6 +28,7 @@ class Rattlesnake(Agent):
         self._t_env = 0
         self._thermal_accuracy = 0
         self._thermal_quality = 0
+        self.searching_behavior = self.interaction_config.searching_behavior
         self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
         self.strike_performance = self.config.strike_performance
         #self.max_thermal_accuracy =self.config.utility.max_thermal_accuracy
@@ -257,17 +258,25 @@ class Rattlesnake(Agent):
             self.alive = False
             self.cause_of_death = 'Starved'
 
+    def check_if_dead(self):
+        """
+        Check if the organism is dead and update its state accordingly.
+        """
+        if not self.alive:
+            self.model.remove_agent(self)
+            
 
     def step(self):
         """Advance the organism's state by one step."""
         self.age += 1
-        self.is_starved()
-        self.check_ct_out_of_bounds()
         self.behavior_module.step()
         ac = self.get_activity_coefficent()
         self.metabolism.cals_lost(mass=self.body_size, temperature=self.body_temperature, activity_coefficient = ac)
         self.update_body_temp()
         self.thermal_accuracy = self.calculate_thermal_accuracy()
         self.thermal_quality = self.calculate_thermal_quality()
+        self.is_starved()
+        self.check_ct_out_of_bounds()
         self.data_logger.log_data()
+        self.check_if_dead()
         print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")
