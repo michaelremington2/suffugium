@@ -67,7 +67,7 @@ class Rattlesnake(Agent):
     
     @cause_of_death.setter
     def cause_of_death(self, value):
-        if not self.alive:
+        if self.alive:
             raise ValueError("Cannot set cause of death for a living organism.")
         self._cause_of_death = value
 
@@ -115,13 +115,13 @@ class Rattlesnake(Agent):
         # Force inactivity if agent is dead or in brumation
         if not self.alive:
             self._active = False
-        elif self.current_microhabitat=='Burrow':
-            self._active = False
         elif self.current_behavior == 'Rest':
             self._active = False
         elif self.current_behavior == 'Thermoregulate':
             self._active = True
         elif self.current_behavior == 'Forage':
+            self._active = True
+        elif self.current_behavior == 'Search':
             self._active = True
         elif self.is_bruminating_today():
             self._active = False
@@ -233,12 +233,12 @@ class Rattlesnake(Agent):
             self.ct_out_of_bounds_tcounter += 1
             if self.ct_out_of_bounds_tcounter >= self.ct_max_steps:
                 self.alive = False
-                self._cause_of_death = 'Cold'
+                self.cause_of_death = 'Cold'
         elif self.body_temperature > self.ct_max:
             self.ct_out_of_bounds_tcounter += 1
             if self.ct_out_of_bounds_tcounter >= self.ct_max_steps:
                 self.alive = False
-                self._cause_of_death = 'Heat'
+                self.cause_of_death = 'Heat'
         else:
             self.ct_out_of_bounds_tcounter = 0
 
@@ -279,4 +279,4 @@ class Rattlesnake(Agent):
         self.check_ct_out_of_bounds()
         self.data_logger.log_data()
         self.check_if_dead()
-        print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")
+        #print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")

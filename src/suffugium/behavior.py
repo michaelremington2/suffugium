@@ -292,8 +292,14 @@ class EctothermBehavior(object):
             return np.ones_like(utilities) / len(utilities)  # Avoid divide-by-zero
         return sparsemax(utilities)
     
+    def reset_prey_consumed(self):
+        '''Reset the prey consumed counter at the end of the day'''
+        self.prey_consumed = 0
+
+    
     def choose_behavior(self):
         '''Choose a behavior stochastically from sparsemax probabilities'''
+        self.reset_prey_consumed() 
         behavior_probabilities = self.set_behavioral_weights()
         return np.random.choice(self.emergent_behaviors, p=behavior_probabilities)
 

@@ -150,8 +150,6 @@ class Suffugium(mesa.Model):
         """Remove an agent from the model."""
         self.agents.remove(agent)  # Removes from scheduler/AgentSet
 
-
-
     def step(self):
         """Advance the model by one step."""
         # This function psuedo-randomly reorders the list of agent objects and
@@ -171,6 +169,8 @@ class Suffugium(mesa.Model):
             if not self.running:
                 break
             self.step()
+        self.running = False
+        #self.summarize_simulation()
 
         end_time = time.perf_counter()
         elapsed = end_time - start_time

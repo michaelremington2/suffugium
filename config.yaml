@@ -2,7 +2,7 @@ Model_Parameters:
   Site: 'Nebraska'
   Experiment: '0'
   agents:
-    Rattlesnake: 1
+    Rattlesnake: 10
 
 Landscape_Parameters:
   Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Nebraska_cleaned.csv'
