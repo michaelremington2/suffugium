@@ -10,20 +10,24 @@ import time
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
-    def __init__(self, sim_id, config, output_directory, seed=None):
+    def __init__(self, sim_id, config, output_directory, seed=None, db_path=None, keep_data=0):
         super().__init__(seed=seed)
         self.sim_id = sim_id
-        if output_directory is not None:
-            os.makedirs(output_directory, exist_ok=True)
-            self.output_directory = output_directory
-        else:
-            self.output_directory = ''
         with open(config, "r") as f:
             _config = yaml.safe_load(f)
         self.config = RootConfig.model_validate(_config)
         self.study_site = self.config.Model_Parameters.Site
         self.experiment = self.config.Model_Parameters.Experiment
+        self.keep_data = keep_data
         self.experiment_name = f"{self.study_site}_{self.experiment}"
+        if output_directory is not None:
+            os.makedirs(output_directory, exist_ok=True)
+            csvs_fp = os.path.join(output_directory, f'{self.experiment_name}_{self.sim_id}')
+            self.output_directory = output_directory
+            self.temp_csvs_fp = csvs_fp
+            os.makedirs(self.temp_csvs_fp, exist_ok=True)
+        else:
+            self.output_directory = ''
         self.microhabitats = ['Burrow', 'Open']
         self.thermal_profile = pl.read_csv(self.config.Landscape_Parameters.Thermal_Database_fp)
         self.env_columns = self.config.Landscape_Parameters.ENV_Temperature_Cols
@@ -149,6 +153,16 @@ class Suffugium(mesa.Model):
     def remove_agent(self, agent):
         """Remove an agent from the model."""
         self.agents.remove(agent)  # Removes from scheduler/AgentSet
+
+    def summarize_simulation(self):
+        """
+        Summarize the simulation results and store them in a database.
+        """
+        simsum = SimSummerizer(csv_folder=self.output_directory, db_path=self.config.Model_Parameters.db_path)
+        csv_files = pl.Path(output_directory).glob('*.csv')
+        simsum.insert_all(csv_files)
+        simsum.make_summary_csv(os.path.join(self.output_directory, 'model_summary.csv'))
+        print("[INFO] Simulation summary completed.")
 
     def step(self):
         """Advance the model by one step."""

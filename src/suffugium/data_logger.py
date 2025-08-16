@@ -11,7 +11,7 @@ class DataLogger(object):
         self.header = ['Step_id', 'Agent_ID', 'Experiment_Name', 'Study_site', 'Experiment', 'Hour', 'Day', 'Month', 'Season', 'Year','Alive','Active', 'Mass', 'Behavior', 'Microhabitat', 'Body_Temperature', 'T_env','Thermal_Accuracy', 'Thermal_Quality', 'Metabolic_state','Prey_Density', 'Attack_Rate', 'Prey_Consumed', 'Cause_of_Death']
 
     def make_file_name(self):
-        return f"{self.model.output_directory}/{self.snake.unique_id}_data_log.csv"
+        return f"{self.model.temp_csvs_fp}/{self.snake.unique_id}_data_log.csv"
     
     def make_file(self):
         file_name = self.make_file_name()
