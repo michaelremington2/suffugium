@@ -3,14 +3,15 @@ import mesa
 import yaml
 import os
 from config_schema import RootConfig
-import polars as pl
+import polars as po
+import pathlib as pl
 from organism import Rattlesnake
 from summarise_sim import SimSummerizer
 import time
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
-    def __init__(self, sim_id, config, output_directory, seed=None, db_path=None, keep_data=0):
+    def __init__(self, sim_id, config, output_directory,db_path, seed=None, keep_data=0):
         super().__init__(seed=seed)
         self.sim_id = sim_id
         with open(config, "r") as f:
@@ -19,6 +20,7 @@ class Suffugium(mesa.Model):
         self.study_site = self.config.Model_Parameters.Site
         self.experiment = self.config.Model_Parameters.Experiment
         self.keep_data = keep_data
+        self.db_path = db_path
         self.experiment_name = f"{self.study_site}_{self.experiment}"
         if output_directory is not None:
             os.makedirs(output_directory, exist_ok=True)
@@ -29,7 +31,7 @@ class Suffugium(mesa.Model):
         else:
             self.output_directory = ''
         self.microhabitats = ['Burrow', 'Open']
-        self.thermal_profile = pl.read_csv(self.config.Landscape_Parameters.Thermal_Database_fp)
+        self.thermal_profile = po.read_csv(self.config.Landscape_Parameters.Thermal_Database_fp)
         self.env_columns = self.config.Landscape_Parameters.ENV_Temperature_Cols
         self.snake_population_size = self.config.Model_Parameters.agents.Rattlesnake
         self.open_temp_vector = self.thermal_profile.select(self.env_columns.Open)
@@ -158,11 +160,17 @@ class Suffugium(mesa.Model):
         """
         Summarize the simulation results and store them in a database.
         """
-        simsum = SimSummerizer(csv_folder=self.output_directory, db_path=self.config.Model_Parameters.db_path)
-        csv_files = pl.Path(output_directory).glob('*.csv')
+        simsum = SimSummerizer(table_name=self.experiment_name, csv_folder=self.temp_csvs_fp, db_path=self.db_path)
+        csv_files = pl.Path(self.temp_csvs_fp).glob('*.csv')
+        simsum.create_table()
         simsum.insert_all(csv_files)
-        simsum.make_summary_csv(os.path.join(self.output_directory, 'model_summary.csv'))
+        simsum.make_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_model_summary.csv'))
         print("[INFO] Simulation summary completed.")
+        # clean up temporary CSV files if keep_data is not set
+        # if self.keep_data == 0:
+        #     for file in csv_files:
+        #         pass
+        #     print("[INFO] Temporary CSV files cleaned up.")
 
     def step(self):
         """Advance the model by one step."""
@@ -184,7 +192,7 @@ class Suffugium(mesa.Model):
                 break
             self.step()
         self.running = False
-        #self.summarize_simulation()
+        self.summarize_simulation()
 
         end_time = time.perf_counter()
         elapsed = end_time - start_time
