@@ -8,6 +8,7 @@ import pathlib as pl
 from organism import Rattlesnake
 from summarise_sim import SimSummerizer
 import time
+import random
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
@@ -167,10 +168,15 @@ class Suffugium(mesa.Model):
         simsum.make_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_model_summary.csv'))
         print("[INFO] Simulation summary completed.")
         # clean up temporary CSV files if keep_data is not set
-        # if self.keep_data == 0:
-        #     for file in csv_files:
-        #         pass
-        #     print("[INFO] Temporary CSV files cleaned up.")
+        csv_files = pl.Path(self.temp_csvs_fp).glob('*.csv')
+        keep_data_counter = self.keep_data
+        for i, file in enumerate(csv_files):
+            if i < keep_data_counter:
+                continue  # keep it
+            print(f"[INFO] Removing temporary file: {file}")
+            os.remove(file)  # remove it
+        print("[INFO] All temporary CSV files cleaned up.")
+        print(f"[INFO] Kept {self.keep_data} CSV files, removed {self.snake_population_size-self.keep_data}.")
 
     def step(self):
         """Advance the model by one step."""

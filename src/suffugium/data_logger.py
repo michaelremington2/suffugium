@@ -22,6 +22,16 @@ class DataLogger(object):
     def log_data(self):
         file_name = self.make_file_name()
         with open(file_name, 'a', newline='') as f:
+            if self.snake.current_behavior=='Brumation':
+                thermal_accuracy = None
+                thermal_quality = None
+                t_env = None
+                body_temperature = None
+            else:
+                thermal_accuracy = self.snake.thermal_accuracy
+                thermal_quality = self.snake.thermal_quality
+                t_env = self.snake.t_env
+                body_temperature = self.snake.body_temperature
             writer = csv.writer(f)
             writer.writerow([
                 self.model.step_id,
@@ -39,10 +49,10 @@ class DataLogger(object):
                 self.snake.body_size,
                 self.snake.current_behavior,
                 self.snake.current_microhabitat,
-                self.snake.body_temperature,
-                self.snake.t_env,
-                self.snake.thermal_accuracy,
-                self.snake.thermal_quality,
+                body_temperature,
+                t_env,
+                thermal_accuracy,
+                thermal_quality,
                 self.snake.metabolism.metabolic_state,
                 self.snake.behavior_module.prey_density,
                 self.snake.behavior_module.attack_rate,

@@ -1,14 +1,14 @@
 Model_Parameters:
-  Site: 'Nebraska'
-  Experiment: '0'
+  Site: 'Canada'
+  Experiment: '1'
   agents:
-    Rattlesnake: 3
+    Rattlesnake: 15
 
 Landscape_Parameters:
-  Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Nebraska_cleaned.csv'
+  Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Canada_cleaned.csv'
   ENV_Temperature_Cols:
-    Open: 'Open'
-    Burrow: 'Burrow'
+    Open: 'Open_1'
+    Burrow: 'Burrow_1'
 
 Rattlesnake_Parameters:
   species: 'Rattlesnake'
@@ -39,7 +39,7 @@ Rattlesnake_Parameters:
     X2_temp: 0.044
     X3_const: -2.58
   Brumation:
-    file_path: '/home/micha/Documents/suffugium/brumation_files/brumation_dates_Nebraska_0.json'
+    file_path: '/home/micha/Documents/suffugium/brumation_files/brumation_dates_Canada_1.json'
     scale: 'Day'
     temperature: 10
   behavior_activity_coefficients: {'Rest':1,

@@ -131,7 +131,7 @@ class SimSummerizer(object):
                     SUM(CASE WHEN Behavior = 'Forage' THEN 1 ELSE 0 END) AS Forage,
                     SUM(CASE WHEN Behavior = 'Rest' THEN 1 ELSE 0 END) AS Rest,
                     SUM(CASE WHEN Behavior = 'Thermoregulate' THEN 1 ELSE 0 END) AS Thermoregulate,
-                    SUM(CASE WHEN Behavior = 'Brumate' THEN 1 ELSE 0 END) AS Brumate,
+                    SUM(CASE WHEN Behavior = 'Brumation' THEN 1 ELSE 0 END) AS Brumate,
                     SUM(CASE WHEN Behavior = 'Search' THEN 1 ELSE 0 END) AS Search
                 FROM {self.table_name}
                 GROUP BY Agent_ID

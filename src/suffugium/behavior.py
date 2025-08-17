@@ -179,7 +179,7 @@ class EctothermBehavior(object):
         if self.prey_consumed> 0:
             self.snake.metabolism.cals_gained(self.prey_body_size, self.calories_per_gram, self.digestion_efficiency)
             if self.snake.searching_behavior:
-                self.snake.search_counter = (self.handling_time-1)
+                self.search_counter = (self.handling_time-1)
 
 
     def rest(self):
