@@ -55,29 +55,36 @@ def test_energy_intake(ectotherm):
     expected_intake = prey_mass * cal_per_gram_conversion * percent_digestion_cals
     assert intake == pytest.approx(expected_intake, rel=1e-3)
 
-# def test_cals_lost(ectotherm):
-#     """Test the calories lost calculation."""
-#     initial_state = ectotherm.metabolic_state
-#     mass = 1000
-#     temperature = 30
-#     activity_coefficient = 1.5
-#     ectotherm.cals_lost(mass=mass, temperature=temperature, activity_coeffcient=activity_coefficient)
-#     smr = ectotherm.smr_eq(mass, temperature)
-#     cals_spent = ectotherm.hourly_energy_expendeture(smr=smr, activity_coeffcient=activity_coefficient)
-#     assert ectotherm.metabolic_state == pytest.approx(initial_state - cals_spent, rel=1e-3)
+def test_cals_lost(ectotherm):
+    """Test the calories lost calculation."""
+    initial_state = ectotherm.metabolic_state
+    mass = 1000
+    temperature = 30
+    activity_coefficient = 1.5
+    ectotherm.cals_lost(mass=mass, temperature=temperature, activity_coefficient=activity_coefficient)
+    smr = ectotherm.smr_eq(mass=ectotherm.org.body_size, temperature=ectotherm.org.body_temperature,
+                            X1_mass=0.930, X2_temp=0.044, X3_const=-2.58)
+    cals_spent = ectotherm.hourly_energy_expenditure(smr=smr, 
+                                              activity_coefficient=activity_coefficient, 
+                                              mlo2_to_joules=ectotherm.mlo2_to_joules, 
+                                              joules_to_cals=ectotherm.joules_to_cals)
+    assert ectotherm.metabolic_state == pytest.approx(initial_state - cals_spent, rel=1e-3)
 
-# def test_cals_gained(ectotherm):
-#     """Test the calories gained calculation."""
-#     initial_state = ectotherm.metabolic_state
-#     prey_mass = 100
-#     cal_per_gram_conversion = 4.1
-#     percent_digestion_cals = 0.8
-#     ectotherm.cals_gained(prey_mass, cal_per_gram_conversion, percent_digestion_cals)
-#     # Assuming metabolic_state update is uncommented in the cals_gained method
-#     # expected_gain = prey_mass * cal_per_gram_conversion * percent_digestion_cals
-#     # assert ectotherm.metabolic_state == pytest.approx(initial_state + expected_gain, rel=1e-3)
+def test_cals_gained(ectotherm):
+    """Test the calories gained calculation."""
+    initial_state = ectotherm.metabolic_state
+    prey_mass = 65
+    cal_per_gram_conversion = 4.1
+    percent_digestion_cals = 0.8
+    ectotherm.cals_gained(prey_mass, cal_per_gram_conversion, percent_digestion_cals)
+    # Assuming metabolic_state update is uncommented in the cals_gained method
+    expected_gain = prey_mass * cal_per_gram_conversion * percent_digestion_cals
+    assert ectotherm.metabolic_state == pytest.approx(initial_state + expected_gain, rel=1e-3)
 
-# def test_metabolic_state_random_sampling(ectotherm):
-#     """Test random sampling within a tuple range for metabolic state."""
-#     ectotherm.metabolic_state = (500, 600)
-#     assert 500 <= ectotherm.metabolic_state <= 600
+def test_initialize_max_metabolic_state(ectotherm):
+    max_meals = 2
+    prey_mass = 65
+    cal_per_gram_conversion = 4.1
+    expected_max_metabolic_state =max_meals*prey_mass*cal_per_gram_conversion
+    ectotherm.initialize_max_metabolic_state()
+    assert ectotherm.max_metabolic_state == pytest.approx(expected_max_metabolic_state, rel=1e-3)
