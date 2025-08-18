@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import Mock
 import numpy as np
 from suffugium.metabolism import EctothermMetabolism
-from unittest.mock import Mock
 
 
 @pytest.fixture

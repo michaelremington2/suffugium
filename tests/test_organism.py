@@ -1,0 +1,78 @@
+import pytest
+from unittest.mock import Mock
+from suffugium.config_schema import InteractionParameters, RattlesnakeParameters
+from suffugium.organism import Rattlesnake
+
+
+@pytest.fixture
+def rattlesnake():
+    """Fixture for creating an instance of the Rattlesnake object class with mock numbers."""
+    Rattlesnake_Parameters_dict = {
+                "species": "Rattlesnake",
+                "body_size_config": {
+                    "distribution": "normal",
+                    "mean": 258.1,
+                    "std": 86.6,
+                    "min": 122,
+                    "max": 575,
+                },
+                "active_hours": [17, 18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                "Initial_Body_Temperature": 25,
+                "initial_calories": 100,
+                "utility": {
+                    "max_meals": 3,
+                },
+                "thermal_preference": {
+                    "k": 0.01,
+                    "t_pref_min": 19,
+                    "t_pref_max": 32,
+                    "t_opt": 29,
+                },
+                "voluntary_ct": {
+                    "min_temp": 5,
+                    "max_temp": 45,
+                    "max_steps": 2,
+                },
+                "strike_performance": 0.22,
+                "delta_t": 60,
+                "smr": {
+                    "X1_mass": 0.93,
+                    "X2_temp": 0.044,
+                    "X3_const": -2.58,
+                },
+                "Brumation": {
+                    "file_path": "/home/micha/Documents/suffugium/brumation_files/brumation_dates_Canada_1.json",
+                    "scale": "Day",
+                    "temperature": 10,
+                },
+                "behavior_activity_coefficients": {
+                    "Rest": 1,
+                    "Thermoregulate": 1.5,
+                    "Forage": 1.5,
+                    "Search": 1.5,
+                    "Brumation": 1,
+                },
+            }
+    interaction_config_dict = {
+                "calories_per_gram": 1.38,
+                "digestion_efficiency": 0.8,
+                "expected_prey_body_size": 70,
+                "handling_time": 2,
+                "attack_rate_range": {
+                    "min": 0.0001,
+                    "max": 0.01
+                },
+                "prey_density_range": {
+                    "min": 1,
+                    "max": 22
+                },
+                "searching_behavior": True,
+                "prey_active_hours": [20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
+            }
+    snake_config = RattlesnakeParameters.model_validate(Rattlesnake_Parameters_dict)
+    interaction_config = InteractionParameters.model_validate(interaction_config_dict)
+    model = Mock()
+    return Rattlesnake(model=model, config=snake_config, interaction_config=interaction_config, logging=False, brumation=False)
+
+def test_body_size(rattlesnake):
+    assert 122<=rattlesnake.body_size<=575

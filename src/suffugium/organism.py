@@ -2,10 +2,10 @@ from mesa import Agent
 import numpy as np
 import json
 import math
-import behavior
-import metabolism
+import suffugium.behavior as behavior
+import suffugium.metabolism as metabolism
 from scipy.stats import truncnorm
-import data_logger as dl
+import suffugium.data_logger as dl
 
 def set_value_truncnorm(mean, std, min_value, max_value):
     a, b = (min_value - mean) / std, (max_value - mean) / std
@@ -14,7 +14,7 @@ def set_value_truncnorm(mean, std, min_value, max_value):
 class Rattlesnake(Agent):
     """An abstract class representing an organism in the simulation."""
     
-    def __init__(self,model, config, interaction_config):
+    def __init__(self,model, config, interaction_config, logging=True, brumation=True):
         super().__init__(model)
         self.config = config
         self.interaction_config = interaction_config
@@ -29,7 +29,10 @@ class Rattlesnake(Agent):
         self._thermal_accuracy = 0
         self._thermal_quality = 0
         self.searching_behavior = self.interaction_config.searching_behavior
-        self.brumation_period = self.get_brumination_period(self.model.config.Rattlesnake_Parameters.brumation.file_path)
+        if brumation:
+            self.brumation_period = self.get_brumination_period(self.config.brumation.file_path)
+        else:
+            self.brumation_period = []
         self.strike_performance = self.config.strike_performance
         #self.max_thermal_accuracy =self.config.utility.max_thermal_accuracy
         self.brumation_temp = self.config.brumation.temperature
@@ -48,9 +51,11 @@ class Rattlesnake(Agent):
         self.set_body_size()
         self.initialize_thermal_preference()
         self.initialize_ct_boundary()
-        self.data_logger = dl.DataLogger(model=self.model, snake=self)
-        self.data_logger.make_file()
-        self.data_logger.log_data() # Initial log entry
+        self.logging = logging
+        if self.logging:
+            self.data_logger = dl.DataLogger(model=self.model, snake=self)
+            self.data_logger.make_file()
+            self.data_logger.log_data() # Initial log entry
 
 
     @property
@@ -277,6 +282,7 @@ class Rattlesnake(Agent):
         self.thermal_quality = self.calculate_thermal_quality()
         self.is_starved()
         self.check_ct_out_of_bounds()
-        self.data_logger.log_data()
+        if self.logging:
+            self.data_logger.log_data()
         self.check_if_dead()
         #print(f"Organism {self.unique_id}- bt is {self.body_temperature}, behavior: {self.current_behavior}, microhabitat: {self.current_microhabitat}")
