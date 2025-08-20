@@ -109,18 +109,11 @@ class EctothermBehavior(object):
         self._search_counter = value
 
     def set_attack_rate(self):
-        """Set the attack rate based on interaction parameters."""
-        return np.round(set_value_uniform(
-            min_value=self.interaction_config.attack_rate_range.min,
-            max_value=self.interaction_config.attack_rate_range.max
-        ), decimals=3)
-    
+        return self.interaction_config.attack_rate.sample(roundto=4)
+
     def set_prey_density(self):
-        """Set the prey density based on interaction parameters."""
-        return np.round(set_value_uniform(
-            min_value=self.interaction_config.prey_density_range.min,
-            max_value=self.interaction_config.prey_density_range.max
-        ),decimals=0)
+        return int(self.interaction_config.prey_density.sample(roundto=0))
+
 
     def thermal_accuracy_calculator(self):
         '''Calculate thermal accuracy'''
@@ -299,12 +292,12 @@ class EctothermBehavior(object):
     
     def choose_behavior(self):
         '''Choose a behavior stochastically from sparsemax probabilities'''
-        self.reset_prey_consumed() 
         behavior_probabilities = self.set_behavioral_weights()
         return np.random.choice(self.emergent_behaviors, p=behavior_probabilities)
 
     def step(self):
         '''Handles picking and executing behavior functions'''
+        self.reset_prey_consumed() 
         if self.snake.is_bruminating_today():
             self.bruminate()
         elif self.model.hour not in self.snake.active_hours:

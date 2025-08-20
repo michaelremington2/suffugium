@@ -1,14 +1,14 @@
 Model_Parameters:
   Site: 'Canada'
-  Experiment: '1'
+  Experiment: '0'
   agents:
     Rattlesnake: 15
 
 Landscape_Parameters:
   Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Canada_cleaned.csv'
   ENV_Temperature_Cols:
-    Open: 'Open_1'
-    Burrow: 'Burrow_1'
+    Open: 'Open'
+    Burrow: 'Burrow'
 
 Rattlesnake_Parameters:
   species: 'Rattlesnake'
@@ -22,7 +22,7 @@ Rattlesnake_Parameters:
   Initial_Body_Temperature: 25
   initial_calories: 100
   utility:
-    max_meals: 3
+    max_meals: 2
   thermal_preference:
     k: 0.01
     t_pref_min: 19
@@ -39,7 +39,7 @@ Rattlesnake_Parameters:
     X2_temp: 0.044
     X3_const: -2.58
   Brumation:
-    file_path: '/home/micha/Documents/suffugium/brumation_files/brumation_dates_Canada_1.json'
+    file_path: '/home/micha/Documents/suffugium/brumation_files/brumation_dates_Canada_0.json'
     scale: 'Day'
     temperature: 10
   behavior_activity_coefficients: {'Rest':1,
@@ -51,13 +51,9 @@ Rattlesnake_Parameters:
 Interaction_Parameters:
   calories_per_gram: 1.38
   digestion_efficiency: 0.8
-  expected_prey_body_size: 65
+  expected_prey_body_size: 50
   handling_time: 2
-  attack_rate_range: 
-    min: 0.001
-    max: 0.01
-  prey_density_range:
-    min: 1
-    max: 22
+  attack_rate: 0.005
+  prey_density: 7
   searching_behavior: True
   prey_active_hours: [20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]

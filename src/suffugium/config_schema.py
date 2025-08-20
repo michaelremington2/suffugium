@@ -2,9 +2,13 @@
 from __future__ import annotations
 from typing import Dict, List, Literal
 from pydantic import BaseModel, Field, FilePath, ConfigDict, conint, confloat, field_validator, model_validator
+import numpy as np
 
 # Constrained types
 Hour = conint(ge=0, le=24)  # we'll map 24 -> 0 in validators
+from typing import Union
+from pydantic import BaseModel, field_validator, ConfigDict, confloat
+
 
 # ---------- Top-level ----------
 class agentsConfig(BaseModel):
@@ -131,6 +135,34 @@ class RangeF(BaseModel):
             raise ValueError('range.max must be > min')
         return v
 
+# ---------- RangeOrValue ----------
+class RangeOrValue(BaseModel):
+    """Accept either a single float/int or a min/max dict."""
+    value: Union[float, RangeF]
+
+    @model_validator(mode="before")
+    @classmethod
+    def coerce_number(cls, v):
+        # Wrap a bare number into {"value": float(v)}
+        if isinstance(v, (int, float)):
+            return {"value": float(v)}
+        return v
+
+    @property
+    def min(self) -> float:
+        return self.value.min if isinstance(self.value, RangeF) else self.value
+
+    @property
+    def max(self) -> float:
+        return self.value.max if isinstance(self.value, RangeF) else self.value
+
+    def sample(self, rng=np.random, roundto=None):
+        if self.min == self.max:
+            return self.min if roundto is None else round(self.min, roundto)
+        val = rng.uniform(self.min, self.max)
+        return val if roundto is None else round(val, roundto)
+
+    
 class InteractionParameters(BaseModel):
     model_config = ConfigDict(extra='forbid', populate_by_name=True)
     model_config = ConfigDict(extra='forbid')
@@ -138,8 +170,8 @@ class InteractionParameters(BaseModel):
     digestion_efficiency: confloat(ge=0, le=1)
     expected_prey_body_size: confloat(gt=0)
     handling_time: confloat(gt=0)  # hours
-    attack_rate_range: RangeF
-    prey_density_range: RangeF
+    attack_rate: RangeOrValue
+    prey_density: RangeOrValue
     searching_behavior: bool
     prey_active_hours: List[Hour]
 
