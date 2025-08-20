@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock
 from suffugium.config_schema import InteractionParameters, RattlesnakeParameters
 from suffugium.organism import Rattlesnake
+import numpy as np
 
 
 @pytest.fixture
@@ -76,3 +77,93 @@ def rattlesnake():
 
 def test_body_size(rattlesnake):
     assert 122<=rattlesnake.body_size<=575
+
+def test_activate_snake(rattlesnake):
+    rattlesnake.current_behavior = 'Forage'
+    rattlesnake.activate_snake()
+    assert rattlesnake.active
+
+def test_cooling_eq_k(rattlesnake):
+    k=0.01
+    delta_t=60
+    t_env = 10
+    t_body = 25
+    expected_answer = 18.23
+    answer = np.round(rattlesnake.cooling_eq_k(k=k,
+                                               t_body=t_body,
+                                               t_env=t_env,
+                                               delta_t=delta_t),2)
+    assert expected_answer == answer
+
+def test_ct_cold_death_after_max_steps(rattlesnake):
+    # Make it easy to trigger
+    rattlesnake.ct_max_steps = 2
+    rattlesnake.ct_out_of_bounds_tcounter = 0
+    rattlesnake.alive = True
+
+    # Below ct_min on two consecutive checks -> death by Cold
+    rattlesnake.body_temperature = rattlesnake.ct_min - 0.1
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.alive is True
+    assert rattlesnake.ct_out_of_bounds_tcounter == 1
+    assert rattlesnake.cause_of_death is None
+
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.alive is False
+    assert rattlesnake.cause_of_death == "Cold"
+
+
+def test_ct_heat_death_after_max_steps(rattlesnake):
+    rattlesnake.ct_max_steps = 2
+    rattlesnake.ct_out_of_bounds_tcounter = 0
+    rattlesnake.alive = True
+
+    # Above ct_max on two consecutive checks -> death by Heat
+    rattlesnake.body_temperature = rattlesnake.ct_max + 0.1
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.alive is True
+    assert rattlesnake.ct_out_of_bounds_tcounter == 1
+
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.alive is False
+    assert rattlesnake.cause_of_death == "Heat"
+
+
+def test_ct_counter_resets_when_in_range(rattlesnake):
+    rattlesnake.ct_max_steps = 3
+    rattlesnake.ct_out_of_bounds_tcounter = 0
+    rattlesnake.alive = True
+
+    # 1st step: out of bounds (cold) increments counter
+    rattlesnake.body_temperature = rattlesnake.ct_min - 5
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.ct_out_of_bounds_tcounter == 1
+    assert rattlesnake.alive is True
+
+    # Return to safe range -> counter resets to 0 and stays alive
+    rattlesnake.body_temperature = (rattlesnake.ct_min + rattlesnake.ct_max) / 2
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.ct_out_of_bounds_tcounter == 0
+    assert rattlesnake.alive is True
+    assert rattlesnake.cause_of_death is None
+
+
+def test_ct_bounds_are_inclusive(rattlesnake):
+    """Exactly ct_min or ct_max should be considered IN range (no increment)."""
+    rattlesnake.ct_out_of_bounds_tcounter = 1  # pre-load to ensure it resets
+    rattlesnake.alive = True
+
+    # Exactly ct_min
+    rattlesnake.body_temperature = rattlesnake.ct_min
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.ct_out_of_bounds_tcounter == 0
+    assert rattlesnake.alive is True
+
+    # Exactly ct_max
+    rattlesnake.ct_out_of_bounds_tcounter = 1
+    rattlesnake.body_temperature = rattlesnake.ct_max
+    rattlesnake.check_ct_out_of_bounds()
+    assert rattlesnake.ct_out_of_bounds_tcounter == 0
+    assert rattlesnake.alive is True
+
+

@@ -2,11 +2,11 @@ import numpy as np
 import mesa
 import yaml
 import os
-from config_schema import RootConfig
+from suffugium.config_schema import RootConfig
 import polars as po
 import pathlib as pl
-from organism import Rattlesnake
-from summarise_sim import SimSummerizer
+from suffugium.organism import Rattlesnake
+from suffugium.summarise_sim import SimSummerizer
 import time
 import random
 
