@@ -1,11 +1,11 @@
 Model_Parameters:
-  Site: 'Canada'
+  Site: 'Texas'
   Experiment: '0'
   agents:
     Rattlesnake: 15
 
 Landscape_Parameters:
-  Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Canada_cleaned.csv'
+  Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Texas_cleaned.csv'
   ENV_Temperature_Cols:
     Open: 'Open'
     Burrow: 'Burrow'
@@ -20,7 +20,7 @@ Rattlesnake_Parameters:
     max: 575
   active_hours: [17, 18,19,20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   Initial_Body_Temperature: 25
-  initial_calories: 100
+  initial_calories: 50
   utility:
     max_meals: 2
   thermal_preference:
@@ -39,7 +39,7 @@ Rattlesnake_Parameters:
     X2_temp: 0.044
     X3_const: -2.58
   Brumation:
-    file_path: '/home/micha/Documents/suffugium/brumation_files/brumation_dates_Canada_0.json'
+    file_path: '/home/micha/Documents/suffugium/brumation_files_test/brumation_dates_Texas_0.json'
     scale: 'Day'
     temperature: 10
   behavior_activity_coefficients: {'Rest':1,

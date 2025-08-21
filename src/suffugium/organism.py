@@ -55,7 +55,6 @@ class Rattlesnake(Agent):
         if self.logging:
             self.data_logger = dl.DataLogger(model=self.model, snake=self)
             self.data_logger.make_file()
-            self.data_logger.log_data() # Initial log entry
 
 
     @property
