@@ -12,9 +12,12 @@ import random
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
-    def __init__(self, sim_id, config, output_directory,db_path, seed=None, keep_data=0):
+    def __init__(self, sim_id, config, output_directory,db_path, seed, keep_data=0):
         super().__init__(seed=seed)
         self.sim_id = sim_id
+        random.seed(seed)
+        np.random.seed(seed)
+        self.np_rng = np.random.default_rng(seed)
         with open(config, "r") as f:
             _config = yaml.safe_load(f)
         self.config = RootConfig.model_validate(_config)

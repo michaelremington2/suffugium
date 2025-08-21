@@ -31,10 +31,6 @@ def sparsemax(z):
     p /= p.sum()  # ensure probabilities sum to 1 for numerical stability
     return p
 
-
-def set_value_uniform(min_value, max_value):
-    return float(np.random.uniform(min_value, max_value))
-
 class EctothermBehavior(object):
     def __init__(self, snake, interaction_config):
         self.snake = snake
@@ -108,6 +104,9 @@ class EctothermBehavior(object):
     def search_counter(self, value):
         self._search_counter = value
 
+    def set_value_uniform(self, min_value, max_value):
+        return float(self.model.np_rng.uniform(min_value, max_value))
+
     def set_attack_rate(self):
         return self.interaction_config.attack_rate.sample(roundto=4)
 
@@ -168,7 +167,7 @@ class EctothermBehavior(object):
 
         prey_encountered = self.holling_type_2(prey_density = self.prey_density,  attack_rate = self.attack_rate, handling_time =self.handling_time, strike_success=self.snake.strike_performance)
         self.prey_encountered += prey_encountered
-        self.prey_consumed = int(np.random.poisson(prey_encountered)) 
+        self.prey_consumed = int(self.model.np_rng.poisson(prey_encountered)) 
         if self.prey_consumed> 0:
             self.snake.metabolism.cals_gained(self.prey_body_size, self.calories_per_gram, self.digestion_efficiency)
             if self.snake.searching_behavior:
@@ -293,7 +292,7 @@ class EctothermBehavior(object):
     def choose_behavior(self):
         '''Choose a behavior stochastically from sparsemax probabilities'''
         behavior_probabilities = self.set_behavioral_weights()
-        return np.random.choice(self.emergent_behaviors, p=behavior_probabilities)
+        return self.model.np_rng.choice(self.emergent_behaviors, p=behavior_probabilities)
 
     def step(self):
         '''Handles picking and executing behavior functions'''

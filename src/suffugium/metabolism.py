@@ -25,9 +25,9 @@ class EctothermMetabolism(object):
     @metabolic_state.setter
     def metabolic_state(self, value):
         if isinstance(value, (list, tuple)) and len(value) == 2:
-            self._metabolic_state = float(np.random.uniform(value[0], value[1]))
+            self._metabolic_state = float(self.model.np_rng.uniform(value[0], value[1]))
         elif isinstance(value, range):
-            self._metabolic_state = float(np.random.uniform(value.start, value.stop))
+            self._metabolic_state = float(self.model.np_rng.uniform(value.start, value.stop))
         elif isinstance(value, (int, float)):
             self._metabolic_state = float(value)
         else:
