@@ -119,7 +119,7 @@ class SimSummerizer(object):
                 MAX(s.Attack_Rate) AS Attack_Rate,
                 SUM(s.Prey_Consumed) AS Total_Prey_Consumed,
                 AVG(s.Metabolic_state) AS Average_Metabolic_State,
-                MAX(s.Cause_of_Death) AS Cause_of_Death
+                MAX(s.Cause_of_Death) AS Cause_of_Death,
                 bc.Forage,
                 bc.Rest,
                 bc.Thermoregulate,
