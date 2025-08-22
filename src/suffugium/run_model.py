@@ -5,7 +5,7 @@ import sys
 import yaml
 import json
 import logging
-from model import Suffugium
+from suffugium.model import Suffugium
 
 
 def setup_logger(output_folder):
