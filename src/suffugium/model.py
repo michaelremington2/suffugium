@@ -168,7 +168,7 @@ class Suffugium(mesa.Model):
         csv_files = pl.Path(self.temp_csvs_fp).glob('*.csv')
         simsum.create_table()
         simsum.insert_all(csv_files)
-        simsum.make_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_model_summary.csv'))
+        simsum.make_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_model_summary_{self.sim_id}.csv'))
         print("[INFO] Simulation summary completed.")
         # clean up temporary CSV files if keep_data is not set
         csv_files = pl.Path(self.temp_csvs_fp).glob('*.csv')

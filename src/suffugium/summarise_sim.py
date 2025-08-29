@@ -100,7 +100,8 @@ class SimSummerizer(object):
             Prey_Density DOUBLE,
             Attack_Rate DOUBLE,
             Prey_Consumed INTEGER,
-            Cause_of_Death TEXT
+            Cause_of_Death TEXT,
+            Sim_id INTEGER
         );
         """)
         return
@@ -132,7 +133,8 @@ class SimSummerizer(object):
                 Prey_Density,
                 Attack_Rate,
                 Prey_Consumed,
-                Cause_of_Death
+                Cause_of_Death,
+                Sim_id
             FROM read_csv_auto('{csv_path}')
         """)
         return
@@ -157,6 +159,7 @@ class SimSummerizer(object):
                 s.Experiment_Name,
                 s.Study_site,
                 s.Agent_ID,
+                s.Sim_id,
                 MAX(s.Mass) AS Mass,
                 MAX(s.Step_id) AS Last_Step,
                 CASE WHEN MIN(s.Alive) = 1 THEN 'Alive' ELSE 'Dead' END AS Status,
@@ -190,6 +193,7 @@ class SimSummerizer(object):
                 s.Experiment_Name,
                 s.Study_site,
                 s.Agent_ID,
+                s.Sim_id,
                 bc.Forage,
                 bc.Rest,
                 bc.Thermoregulate,
