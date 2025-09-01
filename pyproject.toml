@@ -1,5 +1,5 @@
 [project]
-name = "myproject"
+name = "Suffugium"
 version = "0.1.0"
 description = "Suffugium is a thermally dependent agent-based model for simulating the effects of temperature on ectotherm behavior."
 authors = [
