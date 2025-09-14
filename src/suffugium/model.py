@@ -18,6 +18,7 @@ class Suffugium(mesa.Model):
         random.seed(seed)
         np.random.seed(seed)
         self.np_rng = np.random.default_rng(seed)
+        self.config_file_name = config
         with open(config, "r") as f:
             _config = yaml.safe_load(f)
         self.config = RootConfig.model_validate(_config)

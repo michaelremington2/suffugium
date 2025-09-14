@@ -101,7 +101,8 @@ class SimSummerizer(object):
             Attack_Rate DOUBLE,
             Prey_Consumed INTEGER,
             Cause_of_Death TEXT,
-            Sim_id INTEGER
+            Sim_id INTEGER,
+            config_file_name TEXT
         );
         """)
         return
@@ -134,7 +135,8 @@ class SimSummerizer(object):
                 Attack_Rate,
                 Prey_Consumed,
                 Cause_of_Death,
-                Sim_id
+                Sim_id,
+                config_file_name
             FROM read_csv_auto('{csv_path}')
         """)
         return
@@ -160,6 +162,7 @@ class SimSummerizer(object):
                 s.Study_site,
                 s.Agent_ID,
                 s.Sim_id,
+                s.config_file_name,
                 MAX(s.Mass) AS Mass,
                 MAX(s.Step_id) AS Last_Step,
                 CASE WHEN MIN(s.Alive) = 1 THEN 'Alive' ELSE 'Dead' END AS Status,
@@ -194,6 +197,7 @@ class SimSummerizer(object):
                 s.Study_site,
                 s.Agent_ID,
                 s.Sim_id,
+                s.config_file_name,
                 bc.Forage,
                 bc.Rest,
                 bc.Thermoregulate,
