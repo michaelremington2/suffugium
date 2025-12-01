@@ -12,7 +12,7 @@ import random
 
 class Suffugium(mesa.Model):
     '''A model for simulating the survival of ectotherms at a given location.'''
-    def __init__(self, sim_id, config, output_directory,db_path, seed, keep_data=0):
+    def __init__(self, sim_id, config, output_directory,db_path, seed, keep_data=0, seasonal_summary=False, monthly_summary=False, hourly_summary=False):
         super().__init__(seed=seed)
         self.sim_id = sim_id
         random.seed(seed)
@@ -25,6 +25,9 @@ class Suffugium(mesa.Model):
         self.study_site = self.config.Model_Parameters.Site
         self.experiment = self.config.Model_Parameters.Experiment
         self.keep_data = keep_data
+        self.seasonal_summary = seasonal_summary
+        self.monthly_summary = monthly_summary
+        self.hourly_summary = hourly_summary
         self.db_path = db_path
         self.experiment_name = f"{self.study_site}_{self.experiment}"
         if output_directory is not None:
@@ -170,6 +173,12 @@ class Suffugium(mesa.Model):
         simsum.create_table()
         simsum.insert_all(csv_files)
         simsum.make_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_model_summary_{self.sim_id}.csv'))
+        if self.seasonal_summary:
+            simsum.make_seasonal_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_seasonal_model_summary_{self.sim_id}.csv'))
+        if self.hourly_summary:
+            simsum.make_hourly_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_hourly_model_summary_{self.sim_id}.csv'))
+        if self.monthly_summary:
+            simsum.make_monthly_summary_csv(os.path.join(self.output_directory, f'{self.experiment_name}_monthly_model_summary_{self.sim_id}.csv'))
         print("[INFO] Simulation summary completed.")
         # clean up temporary CSV files if keep_data is not set
         csv_files = pl.Path(self.temp_csvs_fp).glob('*.csv')

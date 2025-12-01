@@ -40,6 +40,9 @@ def main():
     parser.add_argument("--sim_id", type=str, default="", help="ID label for simulation.")
     parser.add_argument("--db_path", type=str, default="", help="file path for the database file used to store output data and formualate model_summary.")
     parser.add_argument("--keep_data", type=int, default=0, help="Frequency of snake sampling (0 for no sampling).")
+    parser.add_argument("--seasonal_summary", action="store_true", default=False, help="Make a seasonal summary.")
+    parser.add_argument("--monthly_summary", action="store_true", default=False, help="Make a seasonal summary.")
+    parser.add_argument("--hourly_summary", action="store_true", default=False, help="Make a hourly summary.")
     args = parser.parse_args()
 
     # Load configuration
@@ -58,7 +61,14 @@ def main():
 
     try:
         start_time = time.time()
-        model = Suffugium(config=args.config, seed=args.seed, output_directory=args.output, sim_id=args.sim_id, db_path=args.db_path, keep_data=args.keep_data)
+        model = Suffugium(config=args.config,
+                          seed=args.seed,
+                          output_directory=args.output, 
+                          sim_id=args.sim_id, db_path=args.db_path, 
+                          keep_data=args.keep_data, 
+                          hourly_summary=args.hourly_summary,
+                          monthly_summary=args.monthly_summary,
+                          seasonal_summary=args.seasonal_summary)
         model.run_model()
         run_time = time.time() - start_time
         logger.info(f"Simulation completed successfully in {run_time:.2f} seconds.")

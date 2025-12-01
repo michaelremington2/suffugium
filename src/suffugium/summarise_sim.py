@@ -211,6 +211,91 @@ class SimSummerizer(object):
         summary_df.to_csv(output_path, index=False)
         print(f"[INFO] Summary CSV created at {output_path}")
         return summary_df
+    
+    def make_seasonal_summary_df(self):
+        query = f"""
+            SELECT
+                Study_site,
+                Experiment_Name,
+                Season,
+                Sim_id,
+                COUNT(DISTINCT Agent_id) as Individuals,
+                AVG(Body_Temperature) AS Mean_Tb,
+                AVG(T_env) AS Mean_Tenv,
+                AVG(Thermal_Accuracy) AS Mean_Tacc,
+                AVG(Thermal_Quality) AS Mean_Tqual,
+                AVG(Metabolic_state) AS Mean_Metabolic_State,
+                SUM(Prey_Consumed) AS Total_Prey_Consumed,
+                AVG(Prey_Consumed) as Mean_Prey_Consumed
+            FROM {self.table_name}
+            WHERE Alive = TRUE  
+            GROUP BY Study_site, Experiment_Name, Season, Sim_id
+            ORDER BY Study_site, Experiment_Name, Sim_id, Season
+        """
+        return self.query_model_table(query)
+
+    def make_seasonal_summary_csv(self, output_path):
+        df = self.make_seasonal_summary_df()
+        df.to_csv(output_path, index=False)
+        print(f"[INFO] Seasonal summary CSV created at {output_path}")
+        return df
+    
+    def make_monthly_summary_df(self):
+        query = f"""
+            SELECT
+                Study_site,
+                Experiment_Name,   
+                Season,
+                Month,
+                Sim_id,
+                COUNT(DISTINCT Agent_id) as Individuals,
+                AVG(Body_Temperature) AS Mean_Tb,
+                AVG(T_env) AS Mean_Tenv,
+                AVG(Thermal_Accuracy) AS Mean_Tacc,
+                AVG(Thermal_Quality) AS Mean_Tqual,
+                SUM(Prey_Consumed) AS Total_Prey_Consumed,
+                AVG(Prey_Consumed) as Mean_Prey_Consumed
+            FROM {self.table_name}
+            WHERE Alive = TRUE
+            GROUP BY Study_site, Experiment_Name, Season, Month, Sim_id
+            ORDER BY Study_site, Experiment_Name, Sim_id, Season, Month
+        """
+        return self.query_model_table(query)
+
+    def make_monthly_summary_csv(self, output_path):
+        df = self.make_monthly_summary_df()
+        df.to_csv(output_path, index=False)
+        print(f"[INFO] Monthly summary CSV created at {output_path}")
+        return df
+    
+    def make_hourly_summary_df(self):
+        query = f"""
+            SELECT
+                Study_site,
+                Experiment_Name,   
+                Hour,
+                Sim_id,
+                COUNT(DISTINCT Agent_id) as Individuals,
+                AVG(Body_Temperature) AS Mean_Tb,
+                AVG(T_env) AS Mean_Tenv,
+                AVG(Thermal_Accuracy) AS Mean_Tacc,
+                AVG(Thermal_Quality) AS Mean_Tqual,
+                SUM(Prey_Consumed) AS Total_Prey_Consumed,
+                AVG(Prey_Consumed) as Mean_Prey_Consumed
+            FROM {self.table_name}
+            WHERE Alive = TRUE
+            GROUP BY Study_site, Experiment_Name, Hour, Sim_id
+            ORDER BY Study_site, Experiment_Name, Sim_id, Hour
+        """
+        return self.query_model_table(query)
+
+    def make_hourly_summary_csv(self, output_path):
+        df = self.make_hourly_summary_df()
+        df.to_csv(output_path, index=False)
+        print(f"[INFO] Hourly summary CSV created at {output_path}")
+        return df
+
+
 
 
 if __name__ == "__main__":
