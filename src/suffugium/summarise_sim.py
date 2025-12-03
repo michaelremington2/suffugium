@@ -96,6 +96,8 @@ class SimSummerizer(object):
             T_env DOUBLE,
             Thermal_Accuracy DOUBLE,
             Thermal_Quality DOUBLE,
+            Burrow_Temperature DOUBLE,
+            Open_Temperature DOUBLE,
             Metabolic_state DOUBLE,
             Prey_Density DOUBLE,
             Attack_Rate DOUBLE,
@@ -130,6 +132,8 @@ class SimSummerizer(object):
                 T_env,
                 Thermal_Accuracy,
                 Thermal_Quality,
+                Burrow_Temperature,
+                Open_Temperature,
                 Metabolic_state,
                 Prey_Density,
                 Attack_Rate,
@@ -224,6 +228,8 @@ class SimSummerizer(object):
                 AVG(T_env) AS Mean_Tenv,
                 AVG(Thermal_Accuracy) AS Mean_Tacc,
                 AVG(Thermal_Quality) AS Mean_Tqual,
+                AVG(Burrow_Temperature) as Burrow_Temperature,
+                AVG(Open_Temperature) as Open_Temperature,
                 AVG(Metabolic_state) AS Mean_Metabolic_State,
                 SUM(Prey_Consumed) AS Total_Prey_Consumed,
                 AVG(Prey_Consumed) as Mean_Prey_Consumed
@@ -253,6 +259,8 @@ class SimSummerizer(object):
                 AVG(T_env) AS Mean_Tenv,
                 AVG(Thermal_Accuracy) AS Mean_Tacc,
                 AVG(Thermal_Quality) AS Mean_Tqual,
+                AVG(Burrow_Temperature) as Burrow_Temperature,
+                AVG(Open_Temperature) as Open_Temperature,
                 SUM(Prey_Consumed) AS Total_Prey_Consumed,
                 AVG(Prey_Consumed) as Mean_Prey_Consumed
             FROM {self.table_name}
@@ -280,6 +288,8 @@ class SimSummerizer(object):
                 AVG(T_env) AS Mean_Tenv,
                 AVG(Thermal_Accuracy) AS Mean_Tacc,
                 AVG(Thermal_Quality) AS Mean_Tqual,
+                AVG(Burrow_Temperature) as Burrow_Temperature,
+                AVG(Open_Temperature) as Open_Temperature,
                 SUM(Prey_Consumed) AS Total_Prey_Consumed,
                 AVG(Prey_Consumed) as Mean_Prey_Consumed
             FROM {self.table_name}

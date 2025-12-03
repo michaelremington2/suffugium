@@ -7,7 +7,7 @@ Model_Parameters:
 Landscape_Parameters:
   Thermal_Database_fp: '/home/micha/Documents/suffugium/environment_data/Nebraska_cleaned.csv'
   ENV_Temperature_Cols:
-    Open: 'Open_3'
+    Open: 'Open_'
     Burrow: 'Burrow_3'
 
 Rattlesnake_Parameters:
